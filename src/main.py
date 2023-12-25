@@ -29,31 +29,8 @@ if __name__ == '__main__':
         'exit': np.array([-1, 2])
     }
 
-    env = Environment(grid, starting_pos, max_steps=1)
+    env = Environment(grid, starting_pos, max_steps=10)
 
     observations, info = env.reset()
 
-    print(env.pos)
-    print(observations)
-
-    # while env.agents:
-    #     observations, rewards, terminations, truncations, infos = env.step({'player_0': 1})
-    #     print(rewards)
-    #     print(env.pos)
-
-    observations, rewards, terminations, truncations, infos = env.step({'player_0': 0})
-    print(rewards)
-    print(env.pos)
-
-    # observations, rewards, terminations, truncations, infos = env.step({'player_0': 1})
-    # print(rewards)
-    # print(env.pos)
-    #
-    # observations, rewards, terminations, truncations, infos = env.step({'player_0': 0})
-    # print(rewards)
-    # print(env.pos)
-
-    print(terminations)
-    print(truncations)
-
-    print(observations)
+    print(env.render())

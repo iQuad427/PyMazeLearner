@@ -46,6 +46,8 @@ class Environment:
             for agent in self.agents
         }  # find manhattan distances between minautor and agents
 
+        print(distances)
+
         min_agent = min(distances, key=distances.get)  # find the closest agent
 
         for i in range(steps):  # Move minautor towards agent (2 steps for 1 agent step)
@@ -61,8 +63,6 @@ class Environment:
                 self.pos[MINAUTOR][0] += 1
             elif self.pos[MINAUTOR][0] > self.pos[min_agent][0] and transitions[0] == 1:
                 self.pos[MINAUTOR][0] -= 1
-
-            print(self.pos[MINAUTOR])
 
     def _agent_on_goal(self, agent):
         agent_position = self.pos[agent]
@@ -136,6 +136,7 @@ class Environment:
             if self._agent_on_goal(agent):
                 rewards[agent] = 1
                 terminations[agent] = True
+                print(f"Player {agent} escaped!")
 
         # Check Minautor for Punishment
         for agent in self.agents:
@@ -175,4 +176,70 @@ class Environment:
     def render(self):
         # TODO: render current state
         # put the state history as variable in env to allow for animation of all states
-        pass
+
+        matrix = deepcopy(self.transition_matrix)
+
+        # render_grid = np.zeros(tuple(matrix.shape[0:1]))
+        item_grid = np.zeros(tuple(matrix.shape[0:2]))
+
+        for item in self.pos:
+            if item == MINAUTOR:
+                item_grid[*self.pos[item]] = 100
+            elif item == EXIT:
+                item_grid[*self.pos[item]] = 10
+            else:  # item == AGENT
+                item_grid[*self.pos[item]] = 1
+
+        buffer = ""
+
+        for i, row in enumerate(self.transition_matrix):
+            for wall_iter in range(2):
+                for j, col in enumerate(row):
+                    if j == 0:
+                        if col[3] == 0:
+                            buffer += "█"
+                        else:
+                            buffer += "#"
+
+                    if wall_iter == 0:
+                        if matrix[i, j, 0] == 0:
+                            buffer += " █"
+                        else:
+                            if i == 0:
+                                buffer += " G"
+                            else:
+                                buffer += " ░"
+
+                        buffer += " █"
+                    else:
+                        if item_grid[i, j] == 1:
+                            buffer += " A"
+                        # elif item_grid[i, j] == 10:
+                        #     buffer += "#"  # FIXME: causes the goal to be set at the wrong place with index -1
+                        elif item_grid[i, j] == 100:
+                            buffer += " M"
+                        else:
+                            buffer += "  "
+
+                        if matrix[i, j, 1] == 0:
+                            buffer += " █"
+                        else:
+                            buffer += " ░"
+
+                    # buffer += " "
+
+                buffer += "\n"
+
+            if i == len(row) - 1:
+                buffer += "█"
+                for j, col in enumerate(row):
+                    if matrix[i, j, 2] == 0:
+                        buffer += " █"
+                    else:
+                        buffer += " #"
+
+                    buffer += " █"
+
+                buffer += " "
+
+        return buffer
