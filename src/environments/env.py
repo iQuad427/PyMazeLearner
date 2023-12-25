@@ -10,7 +10,7 @@ class Environment:
     def __init__(self, transition_matrix=None, starting_pos=None, max_steps=100):
         self.transition_matrix = transition_matrix
 
-        self.moves = np.array([[-1, 0], [0, 1], [1, 0], [0, -1]])
+        self.moves = np.array([[0, 0], [-1, 0], [0, 1], [1, 0], [0, -1]])
 
         # starting_pos = {
         #     MINAUTOR: [x, y],
@@ -36,7 +36,8 @@ class Environment:
 
         observations = self._observe()
 
-        infos = {agent: pos for agent, pos in self.pos.values()}
+        infos = {agent: self.pos[agent] for agent in self.possible_agents}
+        infos[MINAUTOR] = self.pos[MINAUTOR].copy()
 
         return observations, infos
 
@@ -46,23 +47,23 @@ class Environment:
             for agent in self.agents
         }  # find manhattan distances between minautor and agents
 
-        min_agent = min(distances, key=distances.get)  # find the closest agent
+        if distances:
+            min_agent = min(distances, key=distances.get)  # find the closest agent
 
-        for i in range(steps):  # Move minautor towards agent (2 steps for 1 agent step)
-            transitions = self.transition_matrix[self.pos[MINAUTOR][0], self.pos[MINAUTOR][1], :]
+            for i in range(steps):  # Move minautor towards agent (2 steps for 1 agent step)
+                transitions = self.transition_matrix[self.pos[MINAUTOR][0], self.pos[MINAUTOR][1], :]
 
-            # First, horizontally
-            if self.pos[MINAUTOR][1] < self.pos[min_agent][1] and transitions[1] == 1:
-                self.pos[MINAUTOR][1] += 1
-            elif self.pos[MINAUTOR][1] > self.pos[min_agent][1] and transitions[3] == 1:
-                self.pos[MINAUTOR][1] -= 1
-            # Then, vertically
-            elif self.pos[MINAUTOR][0] < self.pos[min_agent][0] and transitions[2] == 1:
-                self.pos[MINAUTOR][0] += 1
-            elif self.pos[MINAUTOR][0] > self.pos[min_agent][0] and transitions[0] == 1:
-                self.pos[MINAUTOR][0] -= 1
+                # First, horizontally
+                if self.pos[MINAUTOR][1] < self.pos[min_agent][1] and transitions[1] == 1:
+                    self.pos[MINAUTOR][1] += 1
+                elif self.pos[MINAUTOR][1] > self.pos[min_agent][1] and transitions[3] == 1:
+                    self.pos[MINAUTOR][1] -= 1
+                # Then, vertically
+                elif self.pos[MINAUTOR][0] < self.pos[min_agent][0] and transitions[2] == 1:
+                    self.pos[MINAUTOR][0] += 1
+                elif self.pos[MINAUTOR][0] > self.pos[min_agent][0] and transitions[0] == 1:
+                    self.pos[MINAUTOR][0] -= 1
 
-            print(self.pos[MINAUTOR])
 
     def _agent_on_goal(self, agent):
         agent_position = self.pos[agent]
@@ -105,12 +106,13 @@ class Environment:
 
     def step(self, actions):
         """
-        - 0 : up
-        - 1 : right
-        - 2 : down
-        - 3 : left
+        - 0 : delay
+        - 1 : up
+        - 2 : right
+        - 3 : down
+        - 4 : left
 
-        MOVES: list = [[-1, 0], [0, 1], [1, 0], [0, -1]]
+        MOVES: list = [[0, 0], [-1, 0], [0, 1], [1, 0], [0, -1]]
 
         :param actions: dictionary of actions to take for each agent
         :return:
@@ -121,7 +123,7 @@ class Environment:
             agent_action = actions[agent]
             agent_position = self.pos[agent]
 
-            if self.transition_matrix[*agent_position, agent_action] == 1:
+            if agent_action and self.transition_matrix[*agent_position, agent_action-1] == 1:
                 self.pos[agent] += self.moves[agent_action]
 
         # Move Minautor
@@ -156,12 +158,6 @@ class Environment:
             rewards = {a: -0.02 for a in self.agents}
             truncations = {a: True for a in self.agents}
 
-        # TODO: Get observations
-        observations = self._observe()
-
-        # Get dummy infos (not used in this example)
-        infos = {agent: pos for agent, pos in self.pos.values()}
-
         if any(truncations.values()):
             self.agents = []
 
@@ -169,6 +165,12 @@ class Environment:
         for agent in self.agents:
             if terminations[agent]:
                 self.agents.remove(agent)
+
+        observations = self._observe()
+
+        # Get dummy infos (not used in this example)
+        infos = {agent: self.pos[agent] for agent in self.agents}
+        infos[MINAUTOR] = self.pos[MINAUTOR]
 
         return observations, rewards, terminations, truncations, infos
 

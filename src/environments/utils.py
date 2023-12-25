@@ -1,5 +1,5 @@
 import numpy as np
-from envs.examples import *
+from src.environments.envs.examples import *
 
 
 def grid_from_string(grid_str):
