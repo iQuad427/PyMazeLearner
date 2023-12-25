@@ -29,15 +29,17 @@ def grid_from_string(grid_str):
                         starting_pos['exit'] = np.array([ri // 2 + 1, ci // 2])
         if row:
             grid.append(row)
-    return grid, starting_pos
+    return np.array(grid), starting_pos
 
 
 if __name__ == '__main__':
     grid, starting_pos = grid_from_string(simple_maze)
-    print(starting_pos)
+    print(grid.shape, starting_pos)
     grid, starting_pos = grid_from_string(maze_1)
-    print(starting_pos)
+    print(grid.shape, starting_pos)
     grid, starting_pos = grid_from_string(maze_10)
-    print(starting_pos)
+    print(grid.shape, starting_pos)
     grid, starting_pos = grid_from_string(maze_12)
-    print(starting_pos)
+    print(grid.shape, starting_pos)
+    grid, starting_pos = grid_from_string(maze_15)
+    print(grid.shape, starting_pos)
