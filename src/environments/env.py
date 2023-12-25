@@ -34,10 +34,9 @@ class Environment:
 
         self.timestep = 0
 
-        # TODO: define observations (high-level states?)
-        observations = {a: {} for a in self.agents}
+        observations = self._observe()
 
-        infos = {agent: pos for agent, pos in self.pos}
+        infos = {agent: pos for agent, pos in self.pos.values()}
 
         return observations, infos
 
@@ -53,15 +52,17 @@ class Environment:
             transitions = self.transition_matrix[self.pos[MINAUTOR][0], self.pos[MINAUTOR][1], :]
 
             # First, horizontally
-            if self.pos[MINAUTOR][1] < self.pos[min_agent][1] and transitions[3] == 1:
+            if self.pos[MINAUTOR][1] < self.pos[min_agent][1] and transitions[1] == 1:
                 self.pos[MINAUTOR][1] += 1
-            elif self.pos[MINAUTOR][1] > self.pos[min_agent][1] and transitions[1] == 1:
+            elif self.pos[MINAUTOR][1] > self.pos[min_agent][1] and transitions[3] == 1:
                 self.pos[MINAUTOR][1] -= 1
             # Then, vertically
             elif self.pos[MINAUTOR][0] < self.pos[min_agent][0] and transitions[2] == 1:
                 self.pos[MINAUTOR][0] += 1
             elif self.pos[MINAUTOR][0] > self.pos[min_agent][0] and transitions[0] == 1:
                 self.pos[MINAUTOR][0] -= 1
+
+            print(self.pos[MINAUTOR])
 
     def _agent_on_goal(self, agent):
         agent_position = self.pos[agent]
@@ -78,11 +79,11 @@ class Environment:
         # - Direction of minautor (north, east, south, west + sub-directions) -> [-1, 1]
         # - Direction of goal (north, east, south, west + sub-directions)
 
-        walls_minautor = [*self.transition_matrix[*self.pos[MINAUTOR], :]] == 0  # can't go -> walls
+        walls_minautor = np.array([*self.transition_matrix[*self.pos[MINAUTOR], :]]) == 0  # can't go -> walls
 
         observations = {}
         for agent in self.agents:
-            walls_agent = [*self.transition_matrix[*self.pos[agent], :]] == 0
+            walls_agent = np.array([*self.transition_matrix[*self.pos[agent], :]]) == 0
 
             distance_minautor = abs(self.pos[MINAUTOR][0] - self.pos[agent][0]) + abs(self.pos[MINAUTOR][1] - self.pos[agent][1])
             distance_exit = abs(self.pos[EXIT][0] - self.pos[agent][0]) + abs(self.pos[EXIT][1] - self.pos[agent][1])
@@ -138,7 +139,7 @@ class Environment:
 
         # Check Minautor for Punishment
         for agent in self.agents:
-            if self.pos[agent] == self.pos[MINAUTOR]:
+            if all(self.pos[agent] == self.pos[MINAUTOR]):
                 rewards[agent] = -1
                 terminations[agent] = True
 
@@ -159,7 +160,7 @@ class Environment:
         observations = self._observe()
 
         # Get dummy infos (not used in this example)
-        infos = {agent: pos for agent, pos in self.pos}
+        infos = {agent: pos for agent, pos in self.pos.values()}
 
         if any(truncations.values()):
             self.agents = []
