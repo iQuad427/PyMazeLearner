@@ -10,7 +10,7 @@ class Environment:
     def __init__(self, transition_matrix=None, starting_pos=None, max_steps=100):
         self.transition_matrix = transition_matrix
 
-        self.moves = np.array([[0, 0], [-1, 0], [0, 1], [1, 0], [0, -1]])
+        self.moves = np.array([[-1, 0], [0, 1], [1, 0], [0, -1], [0, 0]])
 
         # starting_pos = {
         #     MINAUTOR: [x, y],
@@ -64,12 +64,11 @@ class Environment:
                 elif self.pos[MINAUTOR][0] > self.pos[min_agent][0] and transitions[0] == 1:
                     self.pos[MINAUTOR][0] -= 1
 
-
     def _agent_on_goal(self, agent):
         agent_position = self.pos[agent]
         shape = self.transition_matrix.shape
 
-        return not (0 <= agent_position[0] <= shape[0] and 0 <= agent_position[1] <= shape[1])
+        return not (0 <= agent_position[0] < shape[0] and 0 <= agent_position[1] < shape[1])
 
     def _observe(self):
         # For each agent:
@@ -86,7 +85,8 @@ class Environment:
         for agent in self.agents:
             walls_agent = np.array([*self.transition_matrix[*self.pos[agent], :]]) == 0
 
-            distance_minautor = abs(self.pos[MINAUTOR][0] - self.pos[agent][0]) + abs(self.pos[MINAUTOR][1] - self.pos[agent][1])
+            distance_minautor = abs(self.pos[MINAUTOR][0] - self.pos[agent][0]) + abs(
+                self.pos[MINAUTOR][1] - self.pos[agent][1])
             distance_exit = abs(self.pos[EXIT][0] - self.pos[agent][0]) + abs(self.pos[EXIT][1] - self.pos[agent][1])
 
             # Return direction of minautor and exit
@@ -106,13 +106,13 @@ class Environment:
 
     def step(self, actions):
         """
-        - 0 : delay
-        - 1 : up
-        - 2 : right
-        - 3 : down
-        - 4 : left
+        - 0 : up
+        - 1 : right
+        - 2 : down
+        - 3 : left
+        - 4 : delay
 
-        MOVES: list = [[0, 0], [-1, 0], [0, 1], [1, 0], [0, -1]]
+        MOVES: list = [[-1, 0], [0, 1], [1, 0], [0, -1], [0, 0]]
 
         :param actions: dictionary of actions to take for each agent
         :return:
@@ -123,7 +123,7 @@ class Environment:
             agent_action = actions[agent]
             agent_position = self.pos[agent]
 
-            if agent_action and self.transition_matrix[*agent_position, agent_action-1] == 1:
+            if agent_action != 4 and self.transition_matrix[*agent_position, agent_action] == 1:
                 self.pos[agent] += self.moves[agent_action]
 
         # Move Minautor
@@ -151,26 +151,26 @@ class Environment:
             if not terminations[agent]:
                 rewards[agent] = -0.02
 
-        self.timestep += 1
-
-        # Check truncation conditions (overwrites termination conditions)
-        truncations = {a: False for a in self.agents}
-        if self.timestep >= self.max_steps:
-            rewards = {a: -0.02 for a in self.agents}
-            truncations = {a: True for a in self.agents}
-
-        if any(truncations.values()):
-            self.agents = []
-
         # Remove agent from environment if terminated (avoid unnecessary computation)
         for agent in self.agents:
             if terminations[agent]:
                 self.agents.remove(agent)
+        self.timestep += 1
 
-        observations = self._observe()
+        # Check truncation conditions (overwrites termination conditions)
+        truncations = {a: False for a in self.possible_agents}
+        if self.timestep >= self.max_steps:
+            rewards = {a: -0.02 for a in self.possible_agents}
+            truncations = {a: True for a in self.possible_agents}
+
+        if any(truncations.values()):
+            self.agents = []
+
+        # observations = self._observe()
+        observations = {}
 
         # Get dummy infos (not used in this example)
-        infos = {agent: self.pos[agent] for agent in self.agents}
+        infos = {agent: self.pos[agent] for agent in self.possible_agents}
         infos[MINAUTOR] = self.pos[MINAUTOR]
 
         return observations, rewards, terminations, truncations, infos
@@ -187,10 +187,10 @@ class Environment:
         for item in self.pos:
             if item == MINAUTOR:
                 item_grid[*self.pos[item]] = 100
-            elif item == EXIT:
-                item_grid[*self.pos[item]] = 10
-            else:  # item == AGENT
-                item_grid[*self.pos[item]] = 1
+            # else:  # item == AGENT
+            #     item_grid[*self.pos[item]] = 1
+        for item in self.agents:
+            item_grid[*self.pos[item]] = 1
 
         buffer = ""
 
@@ -216,8 +216,6 @@ class Environment:
                     else:
                         if item_grid[i, j] == 1:
                             buffer += " A"
-                        # elif item_grid[i, j] == 10:
-                        #     buffer += "#"  # FIXME: causes the goal to be set at the wrong place with index -1
                         elif item_grid[i, j] == 100:
                             buffer += " M"
                         else:
