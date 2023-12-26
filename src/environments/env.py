@@ -35,6 +35,7 @@ class Environment:
         # Rendering
         self.render_mode = render_mode
         self.screen = None
+        self.clock = None
 
         self.CELL_SIZE = 40
         self.WALL_COLOR = (0, 0, 255)
@@ -278,20 +279,29 @@ class Environment:
     def _render_gui(self):
         import pygame  # import now to avoid making it mandatory to run code without human rendering
 
+        dim_x, dim_y = self.transition_matrix.shape[0:2]
+
         # Init pygame
         if self.screen is None:
             pygame.init()
 
-            self.screen = pygame.display.set_mode((500, 500))
+            self.screen = pygame.display.set_mode(((dim_x + 1) * self.CELL_SIZE, (dim_y + 1) * self.CELL_SIZE))
             pygame.display.set_caption("Minotaur's Maze")
-            self.screen.fill(self.BG_COLOR)
+            # self.clock = pygame.time.Clock()
 
         if self.screen is None:
             raise RuntimeError("Screen is None")
 
+        # Handle events (this is really important, window won't show up otherwise)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+
+        # Fill the background
+        self.screen.fill(self.BG_COLOR)
+
         # Draw maze
         width, height = self.screen.get_size()
-        dim_x, dim_y = self.transition_matrix.shape[0:2]
 
         offset_x = (width - dim_x * self.CELL_SIZE) // 2
         offset_y = (height - dim_y * self.CELL_SIZE) // 2
@@ -301,8 +311,6 @@ class Environment:
 
         self._draw_maze(surface)
 
-        self.screen.blit(surface, (offset_x, offset_y))
-
         # Draw players
         for agent in [agent for agent in self.pos if agent is not EXIT]:
             x, y = self.pos[agent]
@@ -310,11 +318,13 @@ class Environment:
             color = (0, 255, 0) if agent != MINOTAUR else (255, 0, 0)
 
             pygame.draw.circle(
-                self.screen,
+                surface,
                 color,
-                (offset_x + x + self.CELL_SIZE / 2, offset_y + y + self.CELL_SIZE / 2),
+                (x * self.CELL_SIZE + self.CELL_SIZE / 2, y * self.CELL_SIZE + self.CELL_SIZE / 2),
                 (self.CELL_SIZE - 10) // 2
             )
+
+        self.screen.blit(surface, (offset_x, offset_y))
 
         # Update the display
         pygame.display.flip()

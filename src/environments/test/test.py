@@ -60,7 +60,9 @@ offset_x = (WIDTH - len(maze_data) * CELL_SIZE) // 2
 offset_y = (HEIGHT - len(maze_data[0]) * CELL_SIZE) // 2
 
 # Main loop
+i = 0
 running = True
+clock = pygame.time.Clock()
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -78,11 +80,18 @@ while running:
     screen.blit(surface, (offset_x, offset_y))
 
     # Add an agent at (x, y) = (0, 0)
-    x, y = 0, 0
-    pygame.draw.circle(screen, (255, 0, 0), (offset_x + x + CELL_SIZE/2, offset_y + y + CELL_SIZE/2), (CELL_SIZE-10) // 2)
+    x, y = (0, 0) if i < 20 else (1, 0)
+    print(x, y)
+    pygame.draw.circle(screen, (255, 0, 0), (offset_x + x * CELL_SIZE + CELL_SIZE/2, offset_y + y * CELL_SIZE + CELL_SIZE/2), (CELL_SIZE-10) // 2)
 
     # Update the display
     pygame.display.flip()
+    # clock.tick(30)
+
+    # Update the rendering
+    pygame.time.wait(100)
+
+    i += 1
 
 # Quit Pygame
 pygame.quit()
