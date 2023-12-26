@@ -1,4 +1,5 @@
 from copy import deepcopy
+from os import path
 
 import numpy as np
 
@@ -10,6 +11,7 @@ class Environment:
     def __init__(self, transition_matrix=None, starting_pos=None, max_steps=100, render_mode=None):
 
         # Game Information
+        self.minotaur_img = None
         self.transition_matrix = transition_matrix
         self.shape = transition_matrix.shape
 
@@ -35,7 +37,12 @@ class Environment:
         # Rendering
         self.render_mode = render_mode
         self.screen = None
+        self.surface = None
         self.clock = None
+
+        # Sprites
+        self.ice_img = None
+        self.player_img = None
 
         self.CELL_SIZE = 40
         self.WALL_COLOR = (0, 0, 255)
@@ -157,7 +164,7 @@ class Environment:
             if self._agent_on_goal(agent):
                 rewards[agent] = 1
                 terminations[agent] = True
-                print(f"Player {agent} escaped!")
+                # print(f"Player {agent} escaped!")
 
         # Check minotaur for Punishment
         for agent in self.agents:
@@ -277,7 +284,7 @@ class Environment:
     def _render_gui(self):
         import pygame  # import now to avoid making it mandatory to run code without human rendering
 
-        dim_x, dim_y = self.transition_matrix.shape[0:2]
+        dim_y, dim_x = self.transition_matrix.shape[0:2]
 
         # Init pygame
         if self.screen is None:
@@ -287,6 +294,9 @@ class Environment:
             pygame.display.set_caption("Minotaur's Maze")
             # self.clock = pygame.time.Clock()
 
+            # Fill the background
+            self.screen.fill(self.BG_COLOR)
+
         if self.screen is None:
             raise RuntimeError("Screen is None")
 
@@ -295,19 +305,34 @@ class Environment:
             if event.type == pygame.QUIT:
                 pygame.quit()
 
-        # Fill the background
-        self.screen.fill(self.BG_COLOR)
-
-        # Draw maze
         width, height = self.screen.get_size()
+
+        if self.ice_img is None:
+            file_name = path.join(path.dirname(__file__), "img/ice.png")
+            self.ice_img = pygame.transform.scale(
+                pygame.image.load(file_name), (self.CELL_SIZE, self.CELL_SIZE)
+            )
+
+        if self.player_img is None:
+            file_name = path.join(path.dirname(__file__), "img/cookie.png")
+            self.player_img = pygame.transform.scale(
+                pygame.image.load(file_name), (self.CELL_SIZE + 10, self.CELL_SIZE + 10)
+            )
+
+        if self.minotaur_img is None:
+            file_name = path.join(path.dirname(__file__), "img/elf_down.png")
+            self.minotaur_img = pygame.transform.scale(
+                pygame.image.load(file_name), (self.CELL_SIZE + 10, self.CELL_SIZE + 10)
+            )
 
         offset_x = (width - dim_x * self.CELL_SIZE) // 2
         offset_y = (height - dim_y * self.CELL_SIZE) // 2
 
-        surface = pygame.Surface((dim_x * self.CELL_SIZE + 1, dim_y * self.CELL_SIZE + 1))
-        surface.fill((255, 255, 255))
+        # Draw maze
+        self.surface = pygame.Surface((dim_x * self.CELL_SIZE + 1, dim_y * self.CELL_SIZE + 1))
+        self.surface.fill((255, 255, 255))
 
-        self._draw_maze(surface)
+        self._draw_maze(self.surface)
 
         # Draw players
         for agent in [agent for agent in self.pos if agent is not EXIT]:
@@ -315,14 +340,20 @@ class Environment:
 
             color = (0, 255, 0) if agent != MINOTAUR else (255, 0, 0)
 
-            pygame.draw.circle(
-                surface,
-                color,
-                (x * self.CELL_SIZE + self.CELL_SIZE / 2, y * self.CELL_SIZE + self.CELL_SIZE / 2),
-                (self.CELL_SIZE - 10) // 2
+            # Render player image
+            self.surface.blit(
+                self.player_img if agent != MINOTAUR else self.minotaur_img,
+                (y * self.CELL_SIZE - 5, x * self.CELL_SIZE - 5)
             )
 
-        self.screen.blit(surface, (offset_x, offset_y))
+            # pygame.draw.circle(
+            #     self.surface,
+            #     color,
+            #     (y * self.CELL_SIZE + self.CELL_SIZE / 2, x * self.CELL_SIZE + self.CELL_SIZE / 2),
+            #     (self.CELL_SIZE - 10) // 2
+            # )
+
+        self.screen.blit(self.surface, (offset_x, offset_y))
 
         # Update the display
         pygame.display.flip()
@@ -337,27 +368,28 @@ class Environment:
 
         for x, row in enumerate(maze):
             for y, cell in enumerate(row):
+                surface.blit(self.ice_img, (y * self.CELL_SIZE, x * self.CELL_SIZE))
                 for i, wall in enumerate(cell):
                     if wall == 0:
                         if i == 0:
                             draw_line(
-                                (x * self.CELL_SIZE, y * self.CELL_SIZE),
-                                (x * self.CELL_SIZE, (y + 1) * self.CELL_SIZE)
+                                (y * self.CELL_SIZE, x * self.CELL_SIZE),
+                                ((y + 1) * self.CELL_SIZE, x * self.CELL_SIZE)
                             )
                         elif i == 1:
                             draw_line(
-                                (x * self.CELL_SIZE, (y + 1) * self.CELL_SIZE),
-                                ((x + 1) * self.CELL_SIZE, (y + 1) * self.CELL_SIZE)
+                                ((y + 1) * self.CELL_SIZE, x * self.CELL_SIZE),
+                                ((y + 1) * self.CELL_SIZE, (x + 1) * self.CELL_SIZE)
                             )
                         elif i == 2:
                             draw_line(
-                                ((x + 1) * self.CELL_SIZE, y * self.CELL_SIZE),
-                                ((x + 1) * self.CELL_SIZE, (y + 1) * self.CELL_SIZE)
+                                ((y + 1) * self.CELL_SIZE, (x + 1) * self.CELL_SIZE),
+                                (y * self.CELL_SIZE, (x + 1) * self.CELL_SIZE)
                             )
                         elif i == 3:
                             draw_line(
-                                (x * self.CELL_SIZE, y * self.CELL_SIZE),
-                                ((x + 1) * self.CELL_SIZE, y * self.CELL_SIZE)
+                                (y * self.CELL_SIZE, (x + 1) * self.CELL_SIZE),
+                                (y * self.CELL_SIZE, x * self.CELL_SIZE)
                             )
 
     def close(self):
