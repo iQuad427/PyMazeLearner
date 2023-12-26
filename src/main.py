@@ -1,13 +1,19 @@
-import numpy as np
-import matplotlib.pyplot as plt
+# import numpy as np
+# import matplotlib.pyplot as plt
 from tqdm import tqdm
+import time
+
+import numpy as np
 
 from src.environments.env import Environment
 from src.environments.utils import grid_from_string
 from src.environments.envs.examples import *
 from src.learners.qlearner import QLearner
 
+import gymnasium
+
 U, R, D, L = 1, 2, 3, 4
+
 
 if __name__ == '__main__':
     grid, starting_pos = grid_from_string(maze_15)
@@ -22,9 +28,7 @@ if __name__ == '__main__':
             actions = {agent: agents[agent].choose_action_train(states[agent]) for agent in states}
             # actions = {'player_A': solution.pop(0)}
             observations, rewards, terminations, truncations, infos = env.step(actions)
-
-            new_states = {agent: tuple(np.concatenate((infos[agent], infos['minautor']))) for agent in agents}
-
+            new_states = {agent: tuple(np.concatenate((info[agent], info['minotaur']))) for agent in agents}
             for agent in agents:
                 agents[agent].learn(states[agent], actions[agent], rewards[agent], new_states[agent])
             if all(terminations.values()) or all(truncations.values()):

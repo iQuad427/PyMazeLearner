@@ -2,18 +2,21 @@ from copy import deepcopy
 
 import numpy as np
 
-MINAUTOR = "minautor"
+MINOTAUR = "minotaur"
 EXIT = "exit"
 
 
 class Environment:
-    def __init__(self, transition_matrix=None, starting_pos=None, max_steps=100):
+    def __init__(self, transition_matrix=None, starting_pos=None, max_steps=100, render_mode=None):
+
+        # Game Information
         self.transition_matrix = transition_matrix
+        self.shape = transition_matrix.shape
 
         self.moves = np.array([[-1, 0], [0, 1], [1, 0], [0, -1], [0, 0]])
 
         # starting_pos = {
-        #     MINAUTOR: [x, y],
+        #     minotaur: [x, y],
         #     EXIT: [x', y'],
         #     agent: [x", y"],
         # }
@@ -21,12 +24,24 @@ class Environment:
         self.pos = None
 
         self.possible_agents = [
-            agent for agent in starting_pos.keys() if agent != MINAUTOR and agent != EXIT
+            agent for agent in starting_pos.keys() if agent != MINOTAUR and agent != EXIT
         ]
         self.agents = None
 
+        # Simulation Information
         self.max_steps = max_steps
         self.timestep = 0
+
+        # Rendering
+        self.render_mode = render_mode
+        self.screen = None
+        self.clock = None
+
+        self.CELL_SIZE = 40
+        self.WALL_COLOR = (0, 0, 255)
+        self.BG_COLOR = (200, 200, 200)
+
+        self.render_fps = 4
 
     def reset(self):
         self.agents = deepcopy(self.possible_agents)
@@ -37,32 +52,36 @@ class Environment:
         observations = self._observe()
 
         infos = {agent: self.pos[agent] for agent in self.possible_agents}
-        infos[MINAUTOR] = self.pos[MINAUTOR].copy()
+        infos[MINOTAUR] = self.pos[MINOTAUR].copy()
+
+        if self.render_mode == "human":
+            # TODO: self.draw_maze(), i.e. put the setting
+            self.render()
 
         return observations, infos
 
-    def _move_minautor(self, steps=2):
+    def _move_minotaur(self, steps=2):
         distances = {
-            agent: abs(self.pos[MINAUTOR][0] - self.pos[agent][0]) + abs(self.pos[MINAUTOR][1] - self.pos[agent][1])
+            agent: abs(self.pos[MINOTAUR][0] - self.pos[agent][0]) + abs(self.pos[MINOTAUR][1] - self.pos[agent][1])
             for agent in self.agents
-        }  # find manhattan distances between minautor and agents
+        }  # find manhattan distances between minotaur and agents
 
         if distances:
             min_agent = min(distances, key=distances.get)  # find the closest agent
 
-            for i in range(steps):  # Move minautor towards agent (2 steps for 1 agent step)
-                transitions = self.transition_matrix[self.pos[MINAUTOR][0], self.pos[MINAUTOR][1], :]
+            for i in range(steps):  # Move minotaur towards agent (2 steps for 1 agent step)
+                transitions = self.transition_matrix[self.pos[MINOTAUR][0], self.pos[MINOTAUR][1], :]
 
                 # First, horizontally
-                if self.pos[MINAUTOR][1] < self.pos[min_agent][1] and transitions[1] == 1:
-                    self.pos[MINAUTOR][1] += 1
-                elif self.pos[MINAUTOR][1] > self.pos[min_agent][1] and transitions[3] == 1:
-                    self.pos[MINAUTOR][1] -= 1
+                if self.pos[MINOTAUR][1] < self.pos[min_agent][1] and transitions[1] == 1:
+                    self.pos[MINOTAUR][1] += 1
+                elif self.pos[MINOTAUR][1] > self.pos[min_agent][1] and transitions[3] == 1:
+                    self.pos[MINOTAUR][1] -= 1
                 # Then, vertically
-                elif self.pos[MINAUTOR][0] < self.pos[min_agent][0] and transitions[2] == 1:
-                    self.pos[MINAUTOR][0] += 1
-                elif self.pos[MINAUTOR][0] > self.pos[min_agent][0] and transitions[0] == 1:
-                    self.pos[MINAUTOR][0] -= 1
+                elif self.pos[MINOTAUR][0] < self.pos[min_agent][0] and transitions[2] == 1:
+                    self.pos[MINOTAUR][0] += 1
+                elif self.pos[MINOTAUR][0] > self.pos[min_agent][0] and transitions[0] == 1:
+                    self.pos[MINOTAUR][0] -= 1
 
     def _agent_on_goal(self, agent):
         agent_position = self.pos[agent]
@@ -73,32 +92,32 @@ class Environment:
     def _observe(self):
         # For each agent:
         # - Walls around it
-        # - Walls around Minautor
-        # - Distance to minautor (manhattan distance)
+        # - Walls around minotaur
+        # - Distance to minotaur (manhattan distance)
         # - Distance to goal (manhattan distance)
-        # - Direction of minautor (north, east, south, west + sub-directions) -> [-1, 1]
+        # - Direction of minotaur (north, east, south, west + sub-directions) -> [-1, 1]
         # - Direction of goal (north, east, south, west + sub-directions)
 
-        walls_minautor = np.array([*self.transition_matrix[*self.pos[MINAUTOR], :]]) == 0  # can't go -> walls
+        walls_minotaur = np.array([*self.transition_matrix[*self.pos[MINOTAUR], :]]) == 0  # can't go -> walls
 
         observations = {}
         for agent in self.agents:
             walls_agent = np.array([*self.transition_matrix[*self.pos[agent], :]]) == 0
 
-            distance_minautor = abs(self.pos[MINAUTOR][0] - self.pos[agent][0]) + abs(
-                self.pos[MINAUTOR][1] - self.pos[agent][1])
+            distance_minotaur = abs(self.pos[MINOTAUR][0] - self.pos[agent][0]) + abs(
+                self.pos[MINOTAUR][1] - self.pos[agent][1])
             distance_exit = abs(self.pos[EXIT][0] - self.pos[agent][0]) + abs(self.pos[EXIT][1] - self.pos[agent][1])
 
-            # Return direction of minautor and exit
-            direction_minautor = np.sign(self.pos[MINAUTOR] - self.pos[agent])
+            # Return direction of minotaur and exit
+            direction_minotaur = np.sign(self.pos[MINOTAUR] - self.pos[agent])
             direction_exit = np.sign(self.pos[EXIT] - self.pos[agent])
 
             observations[agent] = {
                 "walls_agent": walls_agent,
-                "walls_minautor": walls_minautor,
-                "distance_minautor": distance_minautor,
+                "walls_minotaur": walls_minotaur,
+                "distance_minotaur": distance_minotaur,
                 "distance_exit": distance_exit,
-                "direction_minautor": direction_minautor,
+                "direction_minotaur": direction_minotaur,
                 "direction_exit": direction_exit,
             }
 
@@ -126,8 +145,8 @@ class Environment:
             if agent_action != 4 and self.transition_matrix[*agent_position, agent_action] == 1:
                 self.pos[agent] += self.moves[agent_action]
 
-        # Move Minautor
-        self._move_minautor(steps=2)
+        # Move minotaur
+        self._move_minotaur(steps=2)
 
         # Check termination conditions
         terminations = {a: False for a in self.agents}
@@ -140,9 +159,9 @@ class Environment:
                 terminations[agent] = True
                 print(f"Player {agent} escaped!")
 
-        # Check Minautor for Punishment
+        # Check minotaur for Punishment
         for agent in self.agents:
-            if all(self.pos[agent] == self.pos[MINAUTOR]):
+            if all(self.pos[agent] == self.pos[MINOTAUR]):
                 rewards[agent] = -1
                 terminations[agent] = True
 
@@ -171,21 +190,32 @@ class Environment:
 
         # Get dummy infos (not used in this example)
         infos = {agent: self.pos[agent] for agent in self.possible_agents}
-        infos[MINAUTOR] = self.pos[MINAUTOR]
+        infos[MINOTAUR] = self.pos[MINOTAUR]
 
+        # Rendering
+        if self.render_mode == "human":
+            # TODO: self.draw_players(), i.e. redraw the players
+            self.render()
+            
         return observations, rewards, terminations, truncations, infos
 
     def render(self):
-        # TODO: render current state
-        # put the state history as variable in env to allow for animation of all states
+        if self.render_mode == "human":
+            # TODO: render current state
+            # put the state history as variable in env to allow for animation of all states
+            # raise NotImplementedError("Human rendering not implemented yet")
+            return self._render_gui()
+        elif self.render_mode == "ascii":
+            return self._render_ascii()
 
+    def _render_ascii(self):
         matrix = deepcopy(self.transition_matrix)
 
         # render_grid = np.zeros(tuple(matrix.shape[0:1]))
         item_grid = np.zeros(tuple(matrix.shape[0:2]))
 
         for item in self.pos:
-            if item == MINAUTOR:
+            if item == MINOTAUR:
                 item_grid[*self.pos[item]] = 100
             # else:  # item == AGENT
             #     item_grid[*self.pos[item]] = 1
@@ -243,3 +273,95 @@ class Environment:
                 buffer += " "
 
         return buffer
+
+    def _render_gui(self):
+        import pygame  # import now to avoid making it mandatory to run code without human rendering
+
+        dim_x, dim_y = self.transition_matrix.shape[0:2]
+
+        # Init pygame
+        if self.screen is None:
+            pygame.init()
+
+            self.screen = pygame.display.set_mode(((dim_x + 1) * self.CELL_SIZE, (dim_y + 1) * self.CELL_SIZE))
+            pygame.display.set_caption("Minotaur's Maze")
+            # self.clock = pygame.time.Clock()
+
+        if self.screen is None:
+            raise RuntimeError("Screen is None")
+
+        # Handle events (this is really important, window won't show up otherwise)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+
+        # Fill the background
+        self.screen.fill(self.BG_COLOR)
+
+        # Draw maze
+        width, height = self.screen.get_size()
+
+        offset_x = (width - dim_x * self.CELL_SIZE) // 2
+        offset_y = (height - dim_y * self.CELL_SIZE) // 2
+
+        surface = pygame.Surface((dim_x * self.CELL_SIZE + 1, dim_y * self.CELL_SIZE + 1))
+        surface.fill((255, 255, 255))
+
+        self._draw_maze(surface)
+
+        # Draw players
+        for agent in [agent for agent in self.pos if agent is not EXIT]:
+            x, y = self.pos[agent]
+
+            color = (0, 255, 0) if agent != MINOTAUR else (255, 0, 0)
+
+            pygame.draw.circle(
+                surface,
+                color,
+                (x * self.CELL_SIZE + self.CELL_SIZE / 2, y * self.CELL_SIZE + self.CELL_SIZE / 2),
+                (self.CELL_SIZE - 10) // 2
+            )
+
+        self.screen.blit(surface, (offset_x, offset_y))
+
+        # Update the display
+        pygame.display.flip()
+
+    def _draw_maze(self, surface):
+        import pygame
+
+        maze = self.transition_matrix
+
+        def draw_line(start_pos, end_pos):
+            pygame.draw.line(surface, self.WALL_COLOR, start_pos, end_pos, 1)
+
+        for x, row in enumerate(maze):
+            for y, cell in enumerate(row):
+                for i, wall in enumerate(cell):
+                    if wall == 0:
+                        if i == 0:
+                            draw_line(
+                                (x * self.CELL_SIZE, y * self.CELL_SIZE),
+                                (x * self.CELL_SIZE, (y + 1) * self.CELL_SIZE)
+                            )
+                        elif i == 1:
+                            draw_line(
+                                (x * self.CELL_SIZE, (y + 1) * self.CELL_SIZE),
+                                ((x + 1) * self.CELL_SIZE, (y + 1) * self.CELL_SIZE)
+                            )
+                        elif i == 2:
+                            draw_line(
+                                ((x + 1) * self.CELL_SIZE, y * self.CELL_SIZE),
+                                ((x + 1) * self.CELL_SIZE, (y + 1) * self.CELL_SIZE)
+                            )
+                        elif i == 3:
+                            draw_line(
+                                (x * self.CELL_SIZE, y * self.CELL_SIZE),
+                                ((x + 1) * self.CELL_SIZE, y * self.CELL_SIZE)
+                            )
+
+    def close(self):
+        if self.screen is not None:
+            import pygame
+
+            pygame.quit()
