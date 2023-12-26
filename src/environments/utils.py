@@ -13,7 +13,7 @@ def grid_from_string(grid_str):
                 row.append([int(s[ri - 1][ci] != "_"), int(s[ri][ci + 1] != "|"), int(s[ri + 1][ci] != "_"),
                             int(s[ri][ci - 1] != "|")])
             if c == 'M':
-                starting_pos['minautor'] = np.array([ri // 2 - 1, ci // 2])
+                starting_pos['minotaur'] = np.array([ri // 2 - 1, ci // 2])
             elif 'A' <= c <= 'Z' or 'a' <= c <= 'z':
                 starting_pos[str('player_' + c)] = np.array([ri // 2 - 1, ci // 2])
             if c == '#':
