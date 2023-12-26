@@ -16,24 +16,9 @@ U, R, D, L = 1, 2, 3, 4
 
 
 if __name__ == '__main__':
-    grid, pos = grid_from_string(maze_1)
-    env = Environment(grid, pos, max_steps=10_000, render_mode='ascii')
+    grid, starting_pos = grid_from_string(maze_1)
 
-    # print(pos)
-    #
-    # env.reset()
-    #
-    # while env.agents:
-    #     # env.step({agent: 0 for agent in env.possible_agents})
-    #     env.render()
-    #     time.sleep(0.5)
-    #
-    # print("the end.")
-    # env.close()
-
-    # grid, starting_pos = grid_from_string(maze_1)
-    #
-    # env = Environment(grid, starting_pos, max_steps=50_000)
+    env = Environment(grid, starting_pos, max_steps=50_000)
     agents = {agent: QLearner(grid.shape) for agent in env.possible_agents}
     for _ in tqdm(range(10000)):
         observations, info = env.reset()
