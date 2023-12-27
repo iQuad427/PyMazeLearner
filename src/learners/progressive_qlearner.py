@@ -20,7 +20,6 @@ class ProgressiveQLearner(QLearner):
 
     def choose_action_train(self, state, observation=None):
         if self.predict is not  None and state not in self.explored and observation is not None:
-            print("Using prediction function for state", state)
             self.explored.add(state)
             action = self.predict(observation)
 

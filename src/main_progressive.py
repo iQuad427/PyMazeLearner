@@ -3,7 +3,7 @@ from collections import defaultdict
 
 from weka.core import jvm
 
-from src.environments.envs.examples import maze_6, maze_7
+from src.environments.envs.examples import maze_6, maze_15
 from src.learners.progressive_qlearner import ProgressiveQLearner
 from src.learners.symbolic_learner.learner import SymbolicLearner
 from src.learners.symbolic_learner.models.naive_bayes import NaiveBayesModel
@@ -38,7 +38,7 @@ if __name__ == "__main__":
         symbolic_learners[agent].train()
 
     progressive_runner = Runner(
-        maze=maze_7,
+        maze=maze_15,
         agent_builder=lambda agent, grid_shape: ProgressiveQLearner(
             grid_shape, predict=symbolic_learners[agent].predict
         ),
