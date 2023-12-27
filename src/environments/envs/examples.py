@@ -282,4 +282,20 @@ maze_15 = """
 +_+_+_+_+_+_+_+_+_+_+_+_+_+_+
 """
 
-mazes = [maze_1, maze_2, maze_3, maze_4, maze_5, maze_6, maze_7, maze_8, maze_9, maze_10, maze_11, maze_12, maze_13, maze_14, maze_15]
+mazes = [
+    maze_1,
+    maze_2,
+    maze_3,
+    maze_4,
+    maze_5,
+    maze_6,
+    maze_7,
+    maze_8,
+    maze_9,
+    maze_10,
+    maze_11,
+    maze_12,
+    maze_13,
+    maze_14,
+    maze_15,
+]

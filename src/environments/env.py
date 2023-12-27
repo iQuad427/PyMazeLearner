@@ -1,16 +1,24 @@
 from copy import deepcopy
 from os import path
+from typing import Dict, Union
 
 import numpy as np
 
-from src.environments.models import Objects
+from src.environments.models import Objects, GlobalView
+from src.environments.utils import manhattan_distance
+
+
+def _star(pos, data, include_all=False):
+    return data[pos[0], pos[1], :] if include_all else data[pos[0], pos[1]]
 
 
 class Environment:
-    def __init__(self, transition_matrix=None, starting_pos=None, max_steps=100, render_mode=None):
+    def __init__(self, transition_matrix=None, starting_pos=None, max_steps=100, render_mode=None,
+                 enable_observation=True):
 
         # Game Information
         self.minotaur_img = None
+        self.enable_observation = enable_observation
         self.transition_matrix = transition_matrix
         self.shape = transition_matrix.shape
 
@@ -69,10 +77,9 @@ class Environment:
 
     def _move_minotaur(self, steps=2):
         distances = {
-            agent: abs(self.pos[Objects.MINOTAUR][0] - self.pos[agent][0]) + abs(
-                self.pos[Objects.MINOTAUR][1] - self.pos[agent][1])
+            agent: manhattan_distance(self.pos[Objects.MINOTAUR], self.pos[agent])
             for agent in self.agents
-        }  # find manhattan distances between minotaur and agents
+        }  # Find manhattan distances between minotaur and agents
 
         if distances:
             min_agent = min(distances, key=distances.get)  # find the closest agent
@@ -91,44 +98,58 @@ class Environment:
                 elif self.pos[Objects.MINOTAUR][0] > self.pos[min_agent][0] and transitions[0] == 1:
                     self.pos[Objects.MINOTAUR][0] -= 1
 
-    def _agent_on_goal(self, agent):
+    def _agent_on_goal(self, agent) -> bool:
+        """
+        Check if the agent is on the goal position (i.e. the exit)
+        :param agent: agent to check
+        :return: True if the agent is on the goal position, False otherwise
+        """
+
         agent_position = self.pos[agent]
         shape = self.transition_matrix.shape
 
         return not (0 <= agent_position[0] < shape[0] and 0 <= agent_position[1] < shape[1])
 
-    def _observe(self):
-        # For each agent:
-        # - Walls around it
-        # - Walls around minotaur
-        # - Distance to minotaur (manhattan distance)
-        # - Distance to goal (manhattan distance)
-        # - Direction of minotaur (north, east, south, west + sub-directions) -> [-1, 1]
-        # - Direction of goal (north, east, south, west + sub-directions)
+    def _observe(self) -> Union[Dict[str, GlobalView], None]:
+        """
+        For each agent, return a GlobalView object containing the following information:
+        - walls_agent: 4x1 array of booleans, indicating whether there is a wall in the direction of the agent
+        - walls_minotaur: 4x1 array of booleans, indicating whether there is a wall in the direction of the minotaur
+        - distance_minotaur: Manhattan distance between the agent and the minotaur
+        - distance_exit: Manhattan distance between the agent and the exit
+        - direction_minotaur: 2x1 array of booleans, indicating the direction of the minotaur
+        - direction_exit: 2x1 array of booleans, indicating the direction of the exit
 
-        walls_minotaur = np.array([*self.transition_matrix[*self.pos[Objects.MINOTAUR], :]]) == 0  # can't go -> walls
+        :return: dictionary of GlobalView objects
+        """
+
+        if not self.enable_observation:
+            return None
+
+        walls_minotaur = np.array(
+            _star(self.pos[Objects.MINOTAUR], self.transition_matrix, include_all=True) == Objects.WALL
+        )  # can't go -> walls
 
         observations = {}
-        for agent in self.agents:
-            walls_agent = np.array([*self.transition_matrix[*self.pos[agent], :]]) == 0
 
-            distance_minotaur = abs(self.pos[Objects.MINOTAUR][0] - self.pos[agent][0]) + abs(
-                self.pos[Objects.MINOTAUR][1] - self.pos[agent][1])
-            distance_exit = abs(self.pos[Objects.EXIT][0] - self.pos[agent][0]) + abs(
-                self.pos[Objects.EXIT][1] - self.pos[agent][1])
+        for agent in self.agents:
+            walls_agent = np.array(_star(self.pos[agent], self.transition_matrix, include_all=True) == Objects.WALL)
+
+            distance_minotaur = manhattan_distance(self.pos[Objects.MINOTAUR], self.pos[agent])
+            distance_exit = manhattan_distance(self.pos[Objects.EXIT], self.pos[agent])
 
             # Return direction of minotaur and exit
             direction_minotaur = np.sign(self.pos[Objects.MINOTAUR] - self.pos[agent])
             direction_exit = np.sign(self.pos[Objects.EXIT] - self.pos[agent])
 
-            observations[agent] = {
-                "walls_agent": walls_agent,
-                "walls_minotaur": walls_minotaur,
-                "distance_minotaur": distance_minotaur,
-                "distance_exit": distance_exit,
-                "direction_minotaur": direction_minotaur,
-                "direction_exit": direction_exit,
-            }
+            observations[agent] = GlobalView(
+                walls_agent=tuple(walls_agent),
+                walls_minotaur=tuple(walls_minotaur),
+                distance_minotaur=distance_minotaur,
+                distance_exit=distance_exit,
+                direction_minotaur=tuple(direction_minotaur),
+                direction_exit=tuple(direction_exit)
+            )
 
         return observations
 
@@ -151,7 +172,7 @@ class Environment:
             agent_action = actions[agent]
             agent_position = self.pos[agent]
 
-            if agent_action != 4 and self.transition_matrix[*agent_position, agent_action] == 1:
+            if agent_action != 4 and _star(agent_position, self.transition_matrix)[agent_action] == Objects.EMPTY:
                 self.pos[agent] += self.moves[agent_action]
 
         # Move minotaur
@@ -224,11 +245,9 @@ class Environment:
 
         for item in self.pos:
             if item == Objects.MINOTAUR:
-                item_grid[*self.pos[item]] = 100
-            # else:  # item == AGENT
-            #     item_grid[*self.pos[item]] = 1
+                item_grid[self.pos[item][0], self.pos[item][1]] = 100
         for item in self.agents:
-            item_grid[*self.pos[item]] = 1
+            item_grid[self.pos[item][0], self.pos[item][1]] = 1
 
         buffer = ""
 

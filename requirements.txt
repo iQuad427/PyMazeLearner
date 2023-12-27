@@ -1,4 +1,7 @@
 numpy
 matplotlib
+scikit-learn
 pygame
 tqdm
+python-javabridge
+python-weka-wrapper3==0.1.16

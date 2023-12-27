@@ -4,6 +4,10 @@ from src.environments.envs.examples import *
 from src.environments.models import Objects
 
 
+def manhattan_distance(a, b):
+    return np.sum(np.abs(a - b))
+
+
 def grid_from_string(grid_str):
     s = grid_str.split('\n')
     grid = []
@@ -24,8 +28,6 @@ def grid_from_string(grid_str):
                         starting_pos[Objects.EXIT] = np.array([ri // 2 - 1, ci - 1])
                     else:
                         starting_pos[Objects.EXIT] = np.array([ri // 2 - 1, ci // 2])
-                    # Equivalent to:
-                    starting_pos[Objects.EXIT] = np.array([ri // 2 - 1, -1 if ci == 0 else ci // 2])
                 elif ri % 2 == 1 and ci % 2 == 1:
                     if ri == 1:
                         starting_pos[Objects.EXIT] = np.array([ri // 2 - 1, ci // 2])
