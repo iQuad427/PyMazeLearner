@@ -1,4 +1,6 @@
 import logging
+import math
+import time
 from typing import Callable
 
 import numpy as np
@@ -15,8 +17,9 @@ class Runner:
         self,
         maze: str,
         agent_builder: Callable[[str, tuple], QLearner],
-        convergence_count=100,
-        max_steps=200,
+        convergence_count=300,
+        max_steps=1_00,
+            sleep_time=None,
         iterations=10_000,
         render_mode=None,
         train=True,
@@ -27,6 +30,7 @@ class Runner:
         self.max_steps = max_steps
         self.render_mode = render_mode
         self.train = train
+        self.sleep_time = sleep_time
         self.grid, self.starting_pos = grid_from_string(maze)
         self.env = Environment(
             self.grid,
@@ -75,10 +79,14 @@ class Runner:
             # Reset the environment and get the initial observations.
             observations, infos = self.env.reset()
 
-            self._run_once(self.env, ep, infos, observations)
+            if self._run_once(self.env, ep, infos, observations):
+                logging.warning("Early interruption due to convergence")
+                break
 
     def _run_once(self, env, ep, infos, observations):
         while True:
+            if self.sleep_time:
+                time.sleep(self.sleep_time)
             # Get the states of all agents.
             states = self._get_states(infos)
 
@@ -102,18 +110,16 @@ class Runner:
                 for agent in self.agents:
                     if rewards[agent] == 1:
                         self.step_to_win.append(env.timestep)
-                        # Check if the agent has converged (i.e. has not improved in the last 100 episodes).
-                        if len(self.step_to_win) > self.convergence_count:
-                            if (
-                                self.step_to_win[-self.convergence_count :]
-                                == self.step_to_win[-1] * self.convergence_count
-                            ):
-                                logging.info(
-                                    f"Agent {agent} has converged after {ep} episodes."
-                                )
+                        if len(self.step_to_win) >= self.convergence_count*2:
+                            # Check if the last 100 episodes have converged.
+                            if np.min(self.step_to_win[-self.convergence_count:]) == np.min(self.step_to_win[-self.convergence_count*2:-self.convergence_count]):
+                                logging.warning(f"[Just important] Converged after {ep} episodes")
+                                return True
                     else:
-                        self.step_to_win.append(0)
+                        self.step_to_win.append(math.inf)
                 break
+
+        return False
 
     def _learn(self, actions, new_states, rewards, states):
         for agent in self.agents:
