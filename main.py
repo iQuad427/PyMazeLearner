@@ -1,3 +1,5 @@
+import time
+
 import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
@@ -9,9 +11,9 @@ from src.environments.utils import grid_from_string
 from src.learners.qlearner import QLearner
 
 if __name__ == '__main__':
-    grid, starting_pos = grid_from_string(maze_15)
+    grid, starting_pos = grid_from_string(maze_8)
 
-    env = Environment(grid, starting_pos, max_steps=10_000, render_mode=None)
+    env = Environment(grid, starting_pos, max_steps=10_000, render_mode='human')
 
     agents = {agent: QLearner(grid.shape) for agent in env.possible_agents}
 
@@ -25,8 +27,10 @@ if __name__ == '__main__':
             observations, rewards, terminations, truncations, infos = env.step(actions)
 
             new_states = {agent: tuple(np.concatenate((infos[agent], infos[Objects.MINOTAUR]))) for agent in agents}
+
             for agent in agents:
                 agents[agent].learn(states[agent], actions[agent], rewards[agent], new_states[agent])
+
             if all(terminations.values()) or all(truncations.values()):
                 for agent in agents:
                     if rewards[agent] == 1:
@@ -54,7 +58,7 @@ if __name__ == '__main__':
                         step_to_win.append(0)
                 break
 
-            # time.sleep(0.5)
+            time.sleep(0.1)
 
     plt.plot(step_to_win)
     plt.show()

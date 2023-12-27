@@ -18,7 +18,7 @@ class Runner:
         maze: str,
         agent_builder: Callable[[str, tuple], QLearner],
         convergence_count=300,
-        max_steps=1_00,
+        max_steps=10_000,
             sleep_time=None,
         iterations=10_000,
         render_mode=None,
@@ -52,12 +52,15 @@ class Runner:
         max_steps=None,
         render_mode=None,
         train=None,
+            sleep_time=None,
         action_logger=None,
     ):
         if convergence_count is not None:
             self.convergence_count = convergence_count
         if iterations is not None:
             self.iterations = iterations
+        if sleep_time is not None:
+            self.sleep_time = sleep_time
         if max_steps is not None:
             self.max_steps = max_steps
         if render_mode is not None:
@@ -85,8 +88,6 @@ class Runner:
 
     def _run_once(self, env, ep, infos, observations):
         while True:
-            if self.sleep_time:
-                time.sleep(self.sleep_time)
             # Get the states of all agents.
             states = self._get_states(infos)
 
@@ -105,6 +106,9 @@ class Runner:
 
             # Learn from the experience.
             self._learn(actions, new_states, rewards, states)
+
+            if self.sleep_time:
+                time.sleep(self.sleep_time)
 
             if all(terminations.values()) or all(truncations.values()):
                 for agent in self.agents:

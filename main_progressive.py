@@ -14,7 +14,7 @@ if __name__ == "__main__":
     jvm.start(packages=True, system_cp=True)
 
     runner = Runner(
-        maze=maze_6,
+        maze=maze_7,
         agent_builder=lambda _, grid_shape: ProgressiveQLearner(grid_shape),
     )
 
@@ -38,18 +38,18 @@ if __name__ == "__main__":
         symbolic_learners[agent].train()
 
     progressive_runner = Runner(
-        maze=maze_8,
+        maze=maze_6,
         agent_builder=lambda agent, grid_shape: ProgressiveQLearner(
             grid_shape, predict=symbolic_learners[agent].predict
         ),
-        render_mode="human",
-        sleep_time=0.1,
+
     )
 
     progressive_runner.run()
 
     progressive_runner.configure(
         render_mode="human",
+        sleep_time=0.1,
     )
 
     progressive_runner.run()
