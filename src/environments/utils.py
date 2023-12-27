@@ -1,5 +1,7 @@
 import numpy as np
+
 from src.environments.envs.examples import *
+from src.environments.models import Objects
 
 
 def grid_from_string(grid_str):
@@ -13,20 +15,22 @@ def grid_from_string(grid_str):
                 row.append([int(s[ri - 1][ci] != "_"), int(s[ri][ci + 1] != "|"), int(s[ri + 1][ci] != "_"),
                             int(s[ri][ci - 1] != "|")])
             if c == 'M':
-                starting_pos['minotaur'] = np.array([ri // 2 - 1, ci // 2])
+                starting_pos[Objects.MINOTAUR] = np.array([ri // 2 - 1, ci // 2])
             elif 'A' <= c <= 'Z' or 'a' <= c <= 'z':
                 starting_pos[str('player_' + c)] = np.array([ri // 2 - 1, ci // 2])
             if c == '#':
                 if ri % 2 == 0 and ci % 2 == 0:
                     if ci == 0:
-                        starting_pos['exit'] = np.array([ri // 2 - 1, ci - 1])
+                        starting_pos[Objects.EXIT] = np.array([ri // 2 - 1, ci - 1])
                     else:
-                        starting_pos['exit'] = np.array([ri // 2 - 1, ci // 2])
+                        starting_pos[Objects.EXIT] = np.array([ri // 2 - 1, ci // 2])
+                    # Equivalent to:
+                    starting_pos[Objects.EXIT] = np.array([ri // 2 - 1, -1 if ci == 0 else ci // 2])
                 elif ri % 2 == 1 and ci % 2 == 1:
                     if ri == 1:
-                        starting_pos['exit'] = np.array([ri // 2 - 1, ci // 2])
+                        starting_pos[Objects.EXIT] = np.array([ri // 2 - 1, ci // 2])
                     else:
-                        starting_pos['exit'] = np.array([ri // 2 + 1, ci // 2])
+                        starting_pos[Objects.EXIT] = np.array([ri // 2 + 1, ci // 2])
         if row:
             grid.append(row)
     return np.array(grid), starting_pos

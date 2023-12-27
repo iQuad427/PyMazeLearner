@@ -3,8 +3,7 @@ from os import path
 
 import numpy as np
 
-MINOTAUR = "minotaur"
-EXIT = "exit"
+from src.environments.models import Objects
 
 
 class Environment:
@@ -19,14 +18,15 @@ class Environment:
 
         # starting_pos = {
         #     minotaur: [x, y],
-        #     EXIT: [x', y'],
+        #     Objects.EXIT: [x', y'],
         #     agent: [x", y"],
         # }
         self.starting_pos = starting_pos
         self.pos = None
 
+        # Exclude all objects that are not agents. (Minotaur is controlled by the environment and exit is static)
         self.possible_agents = [
-            agent for agent in starting_pos.keys() if agent != MINOTAUR and agent != EXIT
+            agent for agent in starting_pos.keys() if agent != Objects.EXIT and agent != Objects.MINOTAUR
         ]
         self.agents = None
 
@@ -59,7 +59,7 @@ class Environment:
         observations = self._observe()
 
         infos = {agent: self.pos[agent] for agent in self.possible_agents}
-        infos[MINOTAUR] = self.pos[MINOTAUR].copy()
+        infos[Objects.MINOTAUR] = self.pos[Objects.MINOTAUR].copy()
 
         if self.render_mode == "human":
             # TODO: self.draw_maze(), i.e. put the setting
@@ -69,7 +69,8 @@ class Environment:
 
     def _move_minotaur(self, steps=2):
         distances = {
-            agent: abs(self.pos[MINOTAUR][0] - self.pos[agent][0]) + abs(self.pos[MINOTAUR][1] - self.pos[agent][1])
+            agent: abs(self.pos[Objects.MINOTAUR][0] - self.pos[agent][0]) + abs(
+                self.pos[Objects.MINOTAUR][1] - self.pos[agent][1])
             for agent in self.agents
         }  # find manhattan distances between minotaur and agents
 
@@ -77,18 +78,18 @@ class Environment:
             min_agent = min(distances, key=distances.get)  # find the closest agent
 
             for i in range(steps):  # Move minotaur towards agent (2 steps for 1 agent step)
-                transitions = self.transition_matrix[self.pos[MINOTAUR][0], self.pos[MINOTAUR][1], :]
+                transitions = self.transition_matrix[self.pos[Objects.MINOTAUR][0], self.pos[Objects.MINOTAUR][1], :]
 
                 # First, horizontally
-                if self.pos[MINOTAUR][1] < self.pos[min_agent][1] and transitions[1] == 1:
-                    self.pos[MINOTAUR][1] += 1
-                elif self.pos[MINOTAUR][1] > self.pos[min_agent][1] and transitions[3] == 1:
-                    self.pos[MINOTAUR][1] -= 1
+                if self.pos[Objects.MINOTAUR][1] < self.pos[min_agent][1] and transitions[1] == 1:
+                    self.pos[Objects.MINOTAUR][1] += 1
+                elif self.pos[Objects.MINOTAUR][1] > self.pos[min_agent][1] and transitions[3] == 1:
+                    self.pos[Objects.MINOTAUR][1] -= 1
                 # Then, vertically
-                elif self.pos[MINOTAUR][0] < self.pos[min_agent][0] and transitions[2] == 1:
-                    self.pos[MINOTAUR][0] += 1
-                elif self.pos[MINOTAUR][0] > self.pos[min_agent][0] and transitions[0] == 1:
-                    self.pos[MINOTAUR][0] -= 1
+                elif self.pos[Objects.MINOTAUR][0] < self.pos[min_agent][0] and transitions[2] == 1:
+                    self.pos[Objects.MINOTAUR][0] += 1
+                elif self.pos[Objects.MINOTAUR][0] > self.pos[min_agent][0] and transitions[0] == 1:
+                    self.pos[Objects.MINOTAUR][0] -= 1
 
     def _agent_on_goal(self, agent):
         agent_position = self.pos[agent]
@@ -105,19 +106,20 @@ class Environment:
         # - Direction of minotaur (north, east, south, west + sub-directions) -> [-1, 1]
         # - Direction of goal (north, east, south, west + sub-directions)
 
-        walls_minotaur = np.array([*self.transition_matrix[*self.pos[MINOTAUR], :]]) == 0  # can't go -> walls
+        walls_minotaur = np.array([*self.transition_matrix[*self.pos[Objects.MINOTAUR], :]]) == 0  # can't go -> walls
 
         observations = {}
         for agent in self.agents:
             walls_agent = np.array([*self.transition_matrix[*self.pos[agent], :]]) == 0
 
-            distance_minotaur = abs(self.pos[MINOTAUR][0] - self.pos[agent][0]) + abs(
-                self.pos[MINOTAUR][1] - self.pos[agent][1])
-            distance_exit = abs(self.pos[EXIT][0] - self.pos[agent][0]) + abs(self.pos[EXIT][1] - self.pos[agent][1])
+            distance_minotaur = abs(self.pos[Objects.MINOTAUR][0] - self.pos[agent][0]) + abs(
+                self.pos[Objects.MINOTAUR][1] - self.pos[agent][1])
+            distance_exit = abs(self.pos[Objects.EXIT][0] - self.pos[agent][0]) + abs(
+                self.pos[Objects.EXIT][1] - self.pos[agent][1])
 
             # Return direction of minotaur and exit
-            direction_minotaur = np.sign(self.pos[MINOTAUR] - self.pos[agent])
-            direction_exit = np.sign(self.pos[EXIT] - self.pos[agent])
+            direction_minotaur = np.sign(self.pos[Objects.MINOTAUR] - self.pos[agent])
+            direction_exit = np.sign(self.pos[Objects.EXIT] - self.pos[agent])
 
             observations[agent] = {
                 "walls_agent": walls_agent,
@@ -168,7 +170,7 @@ class Environment:
 
         # Check minotaur for Punishment
         for agent in self.agents:
-            if all(self.pos[agent] == self.pos[MINOTAUR]):
+            if np.array_equal(self.pos[agent], self.pos[Objects.MINOTAUR]):
                 rewards[agent] = -1
                 terminations[agent] = True
 
@@ -192,18 +194,17 @@ class Environment:
         if any(truncations.values()):
             self.agents = []
 
-        # observations = self._observe()
-        observations = {}
+        observations = self._observe()
 
         # Get dummy infos (not used in this example)
         infos = {agent: self.pos[agent] for agent in self.possible_agents}
-        infos[MINOTAUR] = self.pos[MINOTAUR]
+        infos[Objects.MINOTAUR] = self.pos[Objects.MINOTAUR]
 
         # Rendering
         if self.render_mode == "human":
             # TODO: self.draw_players(), i.e. redraw the players
             self.render()
-            
+
         return observations, rewards, terminations, truncations, infos
 
     def render(self):
@@ -222,7 +223,7 @@ class Environment:
         item_grid = np.zeros(tuple(matrix.shape[0:2]))
 
         for item in self.pos:
-            if item == MINOTAUR:
+            if item == Objects.MINOTAUR:
                 item_grid[*self.pos[item]] = 100
             # else:  # item == AGENT
             #     item_grid[*self.pos[item]] = 1
@@ -262,8 +263,6 @@ class Environment:
                             buffer += " █"
                         else:
                             buffer += " ░"
-
-                    # buffer += " "
 
                 buffer += "\n"
 
@@ -335,23 +334,14 @@ class Environment:
         self._draw_maze(self.surface)
 
         # Draw players
-        for agent in [agent for agent in self.pos if agent is not EXIT]:
+        for agent in [agent for agent in self.pos if agent is not Objects.EXIT]:
             x, y = self.pos[agent]
-
-            color = (0, 255, 0) if agent != MINOTAUR else (255, 0, 0)
 
             # Render player image
             self.surface.blit(
-                self.player_img if agent != MINOTAUR else self.minotaur_img,
+                self.player_img if agent != Objects.MINOTAUR else self.minotaur_img,
                 (y * self.CELL_SIZE - 5, x * self.CELL_SIZE - 5)
             )
-
-            # pygame.draw.circle(
-            #     self.surface,
-            #     color,
-            #     (y * self.CELL_SIZE + self.CELL_SIZE / 2, x * self.CELL_SIZE + self.CELL_SIZE / 2),
-            #     (self.CELL_SIZE - 10) // 2
-            # )
 
         self.screen.blit(self.surface, (offset_x, offset_y))
 
