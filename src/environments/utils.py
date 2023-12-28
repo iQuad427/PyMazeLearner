@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 import numpy as np
 
 from src.environments.envs.examples import *
@@ -23,7 +25,8 @@ def grid_from_string(grid_str):
             if c == 'M':
                 starting_pos[Objects.MINOTAUR] = np.array([ri // 2 - 1, ci // 2])
             elif 'A' <= c <= 'Z' or 'a' <= c <= 'z':
-                starting_pos[str('player_' + c)] = np.array([ri // 2 - 1, ci // 2])
+                # starting_pos[str('player_' + c)] = np.array([ri // 2 - 1, ci // 2])
+                starting_pos[Objects.AGENT] = np.array([ri // 2 - 1, ci // 2])
             if c == '#':
                 if ri % 2 == 0 and ci % 2 == 0:
                     if ci == 0:
@@ -41,14 +44,23 @@ def grid_from_string(grid_str):
     return np.array(grid), starting_pos
 
 
-if __name__ == '__main__':
-    grid, starting_pos = grid_from_string(simple_maze)
-    print(grid.shape, starting_pos)
-    grid, starting_pos = grid_from_string(maze_1)
-    print(grid.shape, starting_pos)
-    grid, starting_pos = grid_from_string(maze_10)
-    print(grid.shape, starting_pos)
-    grid, starting_pos = grid_from_string(maze_12)
-    print(grid.shape, starting_pos)
-    grid, starting_pos = grid_from_string(maze_15)
-    print(grid.shape, starting_pos)
+def add_agents(starting_pos, n_agents):
+    position = starting_pos[Objects.AGENT]
+
+    for i in range(0, n_agents):
+        starting_pos['player_' + chr(ord('A') + i)] = deepcopy(position)
+
+    return starting_pos
+
+
+# if __name__ == '__main__':
+#     grid, starting_pos = grid_from_string(simple_maze)
+#     print(grid.shape, starting_pos)
+#     grid, starting_pos = grid_from_string(maze_1)
+#     print(grid.shape, starting_pos)
+#     grid, starting_pos = grid_from_string(maze_10)
+#     print(grid.shape, starting_pos)
+#     grid, starting_pos = grid_from_string(maze_12)
+#     print(grid.shape, starting_pos)
+#     grid, starting_pos = grid_from_string(maze_15)
+#     print(grid.shape, starting_pos)

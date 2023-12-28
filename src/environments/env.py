@@ -43,7 +43,7 @@ class Environment:
         self.possible_agents = [
             agent
             for agent in starting_pos.keys()
-            if agent != Objects.EXIT and agent != Objects.MINOTAUR
+            if agent != Objects.EXIT and agent != Objects.MINOTAUR and agent != Objects.AGENT
         ]
         self.agents = None
 
@@ -79,7 +79,6 @@ class Environment:
         infos[Objects.MINOTAUR] = self.pos[Objects.MINOTAUR].copy()
 
         if self.render_mode == "human":
-            # TODO: self.draw_maze(), i.e. put the setting
             self.render()
 
         return observations, infos
@@ -185,8 +184,8 @@ class Environment:
         self._move_minotaur(steps=2)
 
         # Check termination conditions
-        terminations = {a: False for a in self.agents}
-        rewards = {a: 0 for a in self.agents}
+        terminations = {a: False for a in self.possible_agents}
+        rewards = {a: 0 for a in self.possible_agents}
 
         # Exit Maze Reward
         for agent in self.agents:
@@ -194,10 +193,14 @@ class Environment:
             if self._agent_on_goal(agent):
                 rewards[agent] = 1
                 terminations[agent] = True
+                if self.render_mode == "human":
+                    print(f"Player {agent} escaped!")
             # Check minotaur for Punishment
             elif np.array_equal(self.pos[agent], self.pos[Objects.MINOTAUR]):
                 rewards[agent] = -1
                 terminations[agent] = True
+                if self.render_mode == "human":
+                    print(f"Player {agent} got eaten!")
             else:
                 rewards[agent] = -0.02
 
@@ -231,9 +234,6 @@ class Environment:
 
     def render(self):
         if self.render_mode == "human":
-            # TODO: render current state
-            # put the state history as variable in env to allow for animation of all states
-            # raise NotImplementedError("Human rendering not implemented yet")
             return self._render_gui()
         elif self.render_mode == "ascii":
             return self._render_ascii()
@@ -241,7 +241,6 @@ class Environment:
     def _render_ascii(self):
         matrix = deepcopy(self.transition_matrix)
 
-        # render_grid = np.zeros(tuple(matrix.shape[0:1]))
         item_grid = np.zeros(tuple(matrix.shape[0:2]))
 
         for item in self.pos:
@@ -313,7 +312,6 @@ class Environment:
                 ((dim_x + 1) * self.CELL_SIZE, (dim_y + 1) * self.CELL_SIZE)
             )
             pygame.display.set_caption("Minotaur's Maze")
-            # self.clock = pygame.time.Clock()
 
             # Fill the background
             self.screen.fill(self.BG_COLOR)
@@ -358,7 +356,7 @@ class Environment:
         self._draw_maze(self.surface)
 
         # Draw players
-        for agent in [agent for agent in self.pos if agent is not Objects.EXIT]:
+        for agent in [agent for agent in self.pos if agent is not Objects.EXIT and agent is not Objects.AGENT]:
             x, y = self.pos[agent]
 
             # Render player image
