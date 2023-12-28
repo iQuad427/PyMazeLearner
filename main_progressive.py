@@ -13,6 +13,7 @@ if __name__ == "__main__":
     safe_init_jvm()
 
     runner = Runner(
+        enable_observation=False,
         maze=maze_7,
         agent_builder=lambda _, grid_shape: ProgressiveQLearner(grid_shape),
         n_agents=3,

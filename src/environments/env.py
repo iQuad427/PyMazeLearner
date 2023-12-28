@@ -10,9 +10,15 @@ from src.environments.utils import manhattan_distance, _star
 
 
 class Environment:
-    def __init__(self, transition_matrix=None, starting_pos=None, max_steps=100, render_mode=None,
-                 enable_observation=True, observer=None):
-
+    def __init__(
+        self,
+        transition_matrix=None,
+        starting_pos=None,
+        max_steps=100,
+        render_mode=None,
+        enable_observation=True,
+        observer=None,
+    ):
         if observer is None:
             observer = DefaultObserver()
         self.observer = observer
@@ -35,7 +41,9 @@ class Environment:
 
         # Exclude all objects that are not agents. (Minotaur is controlled by the environment and exit is static)
         self.possible_agents = [
-            agent for agent in starting_pos.keys() if agent != Objects.EXIT and agent != Objects.MINOTAUR and agent != Objects.AGENT
+            agent
+            for agent in starting_pos.keys()
+            if agent != Objects.EXIT and agent != Objects.MINOTAUR and agent != Objects.AGENT
         ]
         self.agents = None
 
@@ -84,18 +92,34 @@ class Environment:
         if distances:
             min_agent = min(distances, key=distances.get)  # find the closest agent
 
-            for i in range(steps):  # Move minotaur towards agent (2 steps for 1 agent step)
-                transitions = self.transition_matrix[self.pos[Objects.MINOTAUR][0], self.pos[Objects.MINOTAUR][1], :]
+            for i in range(
+                steps
+            ):  # Move minotaur towards agent (2 steps for 1 agent step)
+                transitions = self.transition_matrix[
+                    self.pos[Objects.MINOTAUR][0], self.pos[Objects.MINOTAUR][1], :
+                ]
 
                 # First, horizontally
-                if self.pos[Objects.MINOTAUR][1] < self.pos[min_agent][1] and transitions[1] == 1:
+                if (
+                    self.pos[Objects.MINOTAUR][1] < self.pos[min_agent][1]
+                    and transitions[1] == 1
+                ):
                     self.pos[Objects.MINOTAUR][1] += 1
-                elif self.pos[Objects.MINOTAUR][1] > self.pos[min_agent][1] and transitions[3] == 1:
+                elif (
+                    self.pos[Objects.MINOTAUR][1] > self.pos[min_agent][1]
+                    and transitions[3] == 1
+                ):
                     self.pos[Objects.MINOTAUR][1] -= 1
                 # Then, vertically
-                elif self.pos[Objects.MINOTAUR][0] < self.pos[min_agent][0] and transitions[2] == 1:
+                elif (
+                    self.pos[Objects.MINOTAUR][0] < self.pos[min_agent][0]
+                    and transitions[2] == 1
+                ):
                     self.pos[Objects.MINOTAUR][0] += 1
-                elif self.pos[Objects.MINOTAUR][0] > self.pos[min_agent][0] and transitions[0] == 1:
+                elif (
+                    self.pos[Objects.MINOTAUR][0] > self.pos[min_agent][0]
+                    and transitions[0] == 1
+                ):
                     self.pos[Objects.MINOTAUR][0] -= 1
 
     def _agent_on_goal(self, agent) -> bool:
@@ -108,7 +132,9 @@ class Environment:
         agent_position = self.pos[agent]
         shape = self.transition_matrix.shape
 
-        return not (0 <= agent_position[0] < shape[0] and 0 <= agent_position[1] < shape[1])
+        return not (
+            0 <= agent_position[0] < shape[0] and 0 <= agent_position[1] < shape[1]
+        )
 
     def _observe(self) -> Union[Dict[str, BaseView], None]:
         """
@@ -147,7 +173,11 @@ class Environment:
             agent_action = actions[agent]
             agent_position = self.pos[agent]
 
-            if agent_action != 4 and _star(agent_position, self.transition_matrix)[agent_action] == Objects.EMPTY:
+            if (
+                agent_action != 4
+                and _star(agent_position, self.transition_matrix)[agent_action]
+                == Objects.EMPTY
+            ):
                 self.pos[agent] += self.moves[agent_action]
 
         # Move minotaur
@@ -159,33 +189,31 @@ class Environment:
 
         # Exit Maze Reward
         for agent in self.agents:
+            # Check agent for Reward
             if self._agent_on_goal(agent):
                 rewards[agent] = 1
                 terminations[agent] = True
                 if self.render_mode == "human":
                     print(f"Player {agent} escaped!")
-
-        # Check minotaur for Punishment
-        for agent in self.agents:
-            if np.array_equal(self.pos[agent], self.pos[Objects.MINOTAUR]):
+            # Check minotaur for Punishment
+            elif np.array_equal(self.pos[agent], self.pos[Objects.MINOTAUR]):
                 rewards[agent] = -1
                 terminations[agent] = True
                 if self.render_mode == "human":
                     print(f"Player {agent} got eaten!")
-
-        # Not Terminated Punishment
-        for agent in self.agents:
-            if not terminations[agent]:
+            else:
                 rewards[agent] = -0.02
 
         # Remove agent from environment if terminated (avoid unnecessary computation)
         for agent in self.agents:
             if terminations[agent]:
                 self.agents.remove(agent)
+
         self.timestep += 1
 
         # Check truncation conditions (overwrites termination conditions)
         truncations = {a: False for a in self.possible_agents}
+
         if self.timestep >= self.max_steps:
             rewards = {a: -0.02 for a in self.possible_agents}
             truncations = {a: True for a in self.possible_agents}
@@ -195,7 +223,6 @@ class Environment:
 
         observations = self._observe()
 
-        # Get dummy infos (not used in this example)
         infos = {agent: self.pos[agent] for agent in self.possible_agents}
         infos[Objects.MINOTAUR] = self.pos[Objects.MINOTAUR]
 
@@ -281,7 +308,9 @@ class Environment:
         if self.screen is None:
             pygame.init()
 
-            self.screen = pygame.display.set_mode(((dim_x + 1) * self.CELL_SIZE, (dim_y + 1) * self.CELL_SIZE))
+            self.screen = pygame.display.set_mode(
+                ((dim_x + 1) * self.CELL_SIZE, (dim_y + 1) * self.CELL_SIZE)
+            )
             pygame.display.set_caption("Minotaur's Maze")
 
             # Fill the background
@@ -319,7 +348,9 @@ class Environment:
         offset_y = (height - dim_y * self.CELL_SIZE) // 2
 
         # Draw maze
-        self.surface = pygame.Surface((dim_x * self.CELL_SIZE + 1, dim_y * self.CELL_SIZE + 1))
+        self.surface = pygame.Surface(
+            (dim_x * self.CELL_SIZE + 1, dim_y * self.CELL_SIZE + 1)
+        )
         self.surface.fill((255, 255, 255))
 
         self._draw_maze(self.surface)
@@ -331,7 +362,7 @@ class Environment:
             # Render player image
             self.surface.blit(
                 self.player_img if agent != Objects.MINOTAUR else self.minotaur_img,
-                (y * self.CELL_SIZE - 5, x * self.CELL_SIZE - 5)
+                (y * self.CELL_SIZE - 5, x * self.CELL_SIZE - 5),
             )
 
         self.screen.blit(self.surface, (offset_x, offset_y))
@@ -355,22 +386,22 @@ class Environment:
                         if i == 0:
                             draw_line(
                                 (y * self.CELL_SIZE, x * self.CELL_SIZE),
-                                ((y + 1) * self.CELL_SIZE, x * self.CELL_SIZE)
+                                ((y + 1) * self.CELL_SIZE, x * self.CELL_SIZE),
                             )
                         elif i == 1:
                             draw_line(
                                 ((y + 1) * self.CELL_SIZE, x * self.CELL_SIZE),
-                                ((y + 1) * self.CELL_SIZE, (x + 1) * self.CELL_SIZE)
+                                ((y + 1) * self.CELL_SIZE, (x + 1) * self.CELL_SIZE),
                             )
                         elif i == 2:
                             draw_line(
                                 ((y + 1) * self.CELL_SIZE, (x + 1) * self.CELL_SIZE),
-                                (y * self.CELL_SIZE, (x + 1) * self.CELL_SIZE)
+                                (y * self.CELL_SIZE, (x + 1) * self.CELL_SIZE),
                             )
                         elif i == 3:
                             draw_line(
                                 (y * self.CELL_SIZE, (x + 1) * self.CELL_SIZE),
-                                (y * self.CELL_SIZE, x * self.CELL_SIZE)
+                                (y * self.CELL_SIZE, x * self.CELL_SIZE),
                             )
 
     def close(self):

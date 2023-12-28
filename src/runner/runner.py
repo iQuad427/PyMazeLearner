@@ -20,7 +20,7 @@ class Runner:
         agent_builder: Callable[[str, tuple], QLearner],
         n_agents=1,
         convergence_count=300,
-        max_steps=10_000,
+        max_steps=1_000,
         sleep_time=None,
         iterations=10_000,
         render_mode=None,
