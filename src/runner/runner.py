@@ -48,7 +48,7 @@ class Runner:
 
         self.did_already_win = False
         self.force_stop = False
-        self.event_callback = event_callback
+        self.event_callback = event_callback or (lambda *args: None)
 
     def configure(
         self,

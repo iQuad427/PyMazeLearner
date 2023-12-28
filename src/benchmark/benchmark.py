@@ -1,4 +1,3 @@
-import os
 from collections import defaultdict
 from typing import Dict, Callable
 
@@ -11,7 +10,6 @@ from src.environments.envs.examples import (
     maze_1,
     maze_2,
     maze_4,
-    maze_3,
     maze_5,
     maze_6,
     maze_8,
@@ -20,8 +18,6 @@ from src.environments.envs.examples import (
     maze_11,
     maze_12,
     maze_13,
-    maze_14,
-    maze_15,
 )
 from src.learners.symbolic_learner.models.c45 import C45Model
 from src.learners.symbolic_learner.models.naive_bayes import NaiveBayesModel
@@ -82,28 +78,19 @@ def benchmark_runnables(
 
 
 if __name__ == "__main__":
-    supp = {
+    _mazes = {
+        "maze_1": maze_1,
+        "maze_2": maze_2,
+        "maze_4": maze_4,
+        "maze_5": maze_5,
+        "maze_6": maze_6,
         "maze_8": maze_8,
         "maze_9": maze_9,
         "maze_10": maze_10,
         "maze_11": maze_11,
         "maze_12": maze_12,
         "maze_13": maze_13,
-        "maze_14": maze_14,
-        "maze_3": maze_3,
-        "maze_15": maze_15,
-        "maze_5": maze_5,
-        "maze_6": maze_6,
-        "maze_4": maze_4,
     }
-
-    _mazes = {
-        "maze_1": maze_1,
-        "maze_2": maze_2,
-    }
-
-    if os.environ.get("supp"):
-        _mazes.update(supp)
 
     benchmark_runnables(
         _mazes,
@@ -126,5 +113,5 @@ if __name__ == "__main__":
                 "cumulative": True,
             },
         },
-        runs=1,
+        runs=5,
     )
