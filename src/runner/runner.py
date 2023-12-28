@@ -23,7 +23,7 @@ class Runner:
         sleep_time=None,
         iterations=10_000,
         render_mode=None,
-            enable_observation: bool = True,
+        enable_observation: bool = True,
         train=True,
         action_logger: Callable[[str, BaseView, int], None] = None,
         observer: BaseObserver = None,
