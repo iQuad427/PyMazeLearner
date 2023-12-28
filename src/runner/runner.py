@@ -1,7 +1,6 @@
 import logging
-import math
 import time
-from typing import Callable, Any
+from typing import Callable
 
 import numpy as np
 from tqdm import tqdm
@@ -24,6 +23,7 @@ class Runner:
         sleep_time=None,
         iterations=10_000,
         render_mode=None,
+            enable_observation: bool = True,
         train=True,
         action_logger: Callable[[str, BaseView, int], None] = None,
         observer: BaseObserver = None,
@@ -32,18 +32,13 @@ class Runner:
         self.convergence_count = convergence_count
         self.iterations = iterations
         self.max_steps = max_steps
+        self.enable_observation = enable_observation
         self.observer = observer
         self.render_mode = render_mode
         self.train = train
         self.sleep_time = sleep_time
         self.grid, self.starting_pos = grid_from_string(maze)
-        self.env = Environment(
-            self.grid,
-            self.starting_pos,
-            max_steps=self.max_steps,
-            render_mode=render_mode,
-            observer=self.observer,
-        )
+        self.env = self.build_env()
         self.agents = {
             agent: agent_builder(agent, self.grid.shape)
             for agent in self.env.possible_agents
@@ -80,11 +75,15 @@ class Runner:
         if action_logger is not None:
             self.action_logger = action_logger
 
-        self.env = Environment(
+        self.env = self.build_env()
+
+    def build_env(self):
+        return Environment(
             self.grid,
             self.starting_pos,
+            enable_observation=self.enable_observation,
             max_steps=self.max_steps,
-            render_mode=render_mode,
+            render_mode=self.render_mode,
             observer=self.observer,
         )
 
@@ -135,8 +134,21 @@ class Runner:
                             self.event_callback(self, first_win(ep, env.timestep))
                             self.did_already_win = True
                         self.step_to_win.append(env.timestep)
-                    else:
-                        self.step_to_win.append(math.inf)
+
+                        if len(self.step_to_win) >= self.convergence_count * 2:
+                            # Check if the last 100 episodes have converged.
+                            if np.min(
+                                self.step_to_win[-self.convergence_count :]
+                            ) == np.min(
+                                self.step_to_win[
+                                    -self.convergence_count
+                                    * 2 : -self.convergence_count
+                                ]
+                            ):
+                                logging.warning(
+                                    f"[Just important] Converged after {ep} episodes"
+                                )
+                                return True
                 break
 
         return False
