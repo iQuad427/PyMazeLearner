@@ -37,6 +37,7 @@ def grid_from_string(grid_str):
                         starting_pos[Objects.EXIT] = np.array([ri // 2 + 1, ci // 2])
         if row:
             grid.append(row)
+
     return np.array(grid), starting_pos
 
 

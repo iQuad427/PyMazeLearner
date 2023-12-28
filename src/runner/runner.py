@@ -1,7 +1,7 @@
 import logging
 import math
 import time
-from typing import Callable
+from typing import Callable, Any
 
 import numpy as np
 from tqdm import tqdm
@@ -11,6 +11,7 @@ from src.environments.models import Objects, BaseView
 from src.environments.observer.base import BaseObserver
 from src.environments.utils import grid_from_string
 from src.learners.qlearner import QLearner
+from src.runner.event import Event, first_win
 
 
 class Runner:
@@ -20,12 +21,13 @@ class Runner:
         agent_builder: Callable[[str, tuple], QLearner],
         convergence_count=300,
         max_steps=10_000,
-            sleep_time=None,
+        sleep_time=None,
         iterations=10_000,
         render_mode=None,
         train=True,
         action_logger: Callable[[str, BaseView, int], None] = None,
-            observer: BaseObserver = None,
+        observer: BaseObserver = None,
+        event_callback: Callable[["Runner", Event], None] = None,
     ):
         self.convergence_count = convergence_count
         self.iterations = iterations
@@ -49,6 +51,10 @@ class Runner:
         self.step_to_win = []
         self.action_logger = action_logger
 
+        self.did_already_win = False
+        self.force_stop = False
+        self.event_callback = event_callback
+
     def configure(
         self,
         convergence_count=None,
@@ -56,7 +62,7 @@ class Runner:
         max_steps=None,
         render_mode=None,
         train=None,
-            sleep_time=None,
+        sleep_time=None,
         action_logger=None,
     ):
         if convergence_count is not None:
@@ -84,6 +90,9 @@ class Runner:
 
     def run(self):
         for ep in tqdm(range(self.iterations), desc="Q-Learning"):
+            if self.force_stop:
+                logging.warning("Early interruption due to force stop")
+                break
             # Reset the environment and get the initial observations.
             observations, infos = self.env.reset()
 
@@ -93,6 +102,10 @@ class Runner:
 
     def _run_once(self, env, ep, infos, observations):
         while True:
+            if self.force_stop:
+                logging.warning("Early interruption due to force stop")
+                break
+
             # Get the states of all agents.
             states = self._get_states(infos)
 
@@ -118,12 +131,10 @@ class Runner:
             if all(terminations.values()) or all(truncations.values()):
                 for agent in self.agents:
                     if rewards[agent] == 1:
+                        if not self.did_already_win:
+                            self.event_callback(self, first_win(ep, env.timestep))
+                            self.did_already_win = True
                         self.step_to_win.append(env.timestep)
-                        if len(self.step_to_win) >= self.convergence_count*2:
-                            # Check if the last 100 episodes have converged.
-                            if np.min(self.step_to_win[-self.convergence_count:]) == np.min(self.step_to_win[-self.convergence_count*2:-self.convergence_count]):
-                                logging.warning(f"[Just important] Converged after {ep} episodes")
-                                return True
                     else:
                         self.step_to_win.append(math.inf)
                 break
