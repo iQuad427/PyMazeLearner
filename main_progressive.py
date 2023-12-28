@@ -1,9 +1,8 @@
 import math
 from collections import defaultdict
 
-from weka.core import jvm
-
-from src.environments.envs.examples import maze_6, maze_15, maze_7, maze_8
+from src.environments.envs.examples import maze_6, maze_7
+from src.java_interop_utils import safe_init_jvm, safe_stop_jvm
 from src.learners.progressive_qlearner import ProgressiveQLearner
 from src.learners.symbolic_learner.learner import SymbolicLearner
 from src.learners.symbolic_learner.models.naive_bayes import NaiveBayesModel
@@ -11,7 +10,7 @@ from src.runner.runner import Runner
 
 if __name__ == "__main__":
     # Initialize the JVM for Weka.
-    jvm.start(packages=True, system_cp=True)
+    safe_init_jvm()
 
     runner = Runner(
         maze=maze_7,
@@ -42,7 +41,6 @@ if __name__ == "__main__":
         agent_builder=lambda agent, grid_shape: ProgressiveQLearner(
             grid_shape, predict=symbolic_learners[agent].predict
         ),
-
     )
 
     progressive_runner.run()
@@ -54,4 +52,4 @@ if __name__ == "__main__":
 
     progressive_runner.run()
 
-    jvm.stop()
+    safe_stop_jvm()

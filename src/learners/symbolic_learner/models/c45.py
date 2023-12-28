@@ -2,7 +2,7 @@ from typing import Dict
 
 from sklearn.tree import DecisionTreeClassifier
 
-from src.environments.models import GlobalView
+from src.environments.models import BaseView
 from src.learners.symbolic_learner.models.base import BasePredictionModel
 
 
@@ -10,7 +10,7 @@ class C45Model(BasePredictionModel):
     def __init__(self):
         self.model = None
 
-    def train(self, source: Dict[GlobalView, Dict[int, int]]):
+    def train(self, source: Dict[BaseView, Dict[int, int]]):
         """Trains a model using the given data."""
         features = [gv.flatten() for gv in source.keys()]
         # Todo: we use max to get the most common move, maybe not what rhe paper does
@@ -21,5 +21,5 @@ class C45Model(BasePredictionModel):
 
         self.model = model
 
-    def predict(self, state: GlobalView) -> int:
+    def predict(self, state: BaseView) -> int:
         return self.model.predict([state.flatten()])[0]

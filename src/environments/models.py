@@ -1,3 +1,4 @@
+import abc
 from dataclasses import dataclass
 
 
@@ -9,8 +10,18 @@ class Objects:
     AGENT = "agent"
 
 
-@dataclass(frozen=True, slots=True)
-class GlobalView:
+class BaseView(abc.ABC):
+    @abc.abstractmethod
+    def flatten(self) -> tuple:
+        pass
+
+    @abc.abstractmethod
+    def __hash__(self):
+        pass
+
+
+@dataclass
+class DefaultView(BaseView):
     walls_agent: tuple
     walls_minotaur: tuple
     distance_minotaur: int

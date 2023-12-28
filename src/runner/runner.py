@@ -7,7 +7,7 @@ import numpy as np
 from tqdm import tqdm
 
 from src.environments.env import Environment
-from src.environments.models import Objects, GlobalView
+from src.environments.models import Objects, BaseView
 from src.environments.utils import grid_from_string
 from src.learners.qlearner import QLearner
 
@@ -23,7 +23,7 @@ class Runner:
         iterations=10_000,
         render_mode=None,
         train=True,
-        action_logger: Callable[[str, GlobalView, int], None] = None,
+        action_logger: Callable[[str, BaseView, int], None] = None,
     ):
         self.convergence_count = convergence_count
         self.iterations = iterations
