@@ -1,7 +1,7 @@
 import logging
 from typing import Callable
 
-from src.environments.models import GlobalView, ACTIONS
+from src.environments.models import BaseView, ACTIONS
 from src.learners.qlearner import QLearner
 
 
@@ -14,7 +14,7 @@ class ProgressiveQLearner(QLearner):
         eps=0.01,
         discount=0.9,
         bias=-0.2,
-        predict: Callable[[GlobalView], int] = None,
+        predict: Callable[[BaseView], int] = None,
     ):
         super().__init__(grid_shape, n_actions, learning_rate, eps, discount)
 

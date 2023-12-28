@@ -8,6 +8,8 @@ from src.environments.models import Objects
 
 def manhattan_distance(a, b):
     return np.sum(np.abs(a - b))
+def _star(pos, data, include_all=False):
+    return data[pos[0], pos[1], :] if include_all else data[pos[0], pos[1]]
 
 
 def grid_from_string(grid_str):
@@ -38,6 +40,7 @@ def grid_from_string(grid_str):
                         starting_pos[Objects.EXIT] = np.array([ri // 2 + 1, ci // 2])
         if row:
             grid.append(row)
+
     return np.array(grid), starting_pos
 
 

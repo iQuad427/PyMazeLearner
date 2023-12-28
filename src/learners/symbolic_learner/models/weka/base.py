@@ -3,7 +3,7 @@ from typing import Dict, Tuple, List, Any
 
 from weka.core.dataset import Instances, Attribute, Instance
 
-from src.environments.models import GlobalView, ACTIONS
+from src.environments.models import BaseView, ACTIONS
 from src.learners.symbolic_learner.models.base import BasePredictionModel
 
 
@@ -36,7 +36,7 @@ class WekaBasedModel(BasePredictionModel, ABC):
 
         return dataset
 
-    def train(self, source: Dict[GlobalView, Dict[int, int]]):
+    def train(self, source: Dict[BaseView, Dict[int, int]]):
         """Trains a model using the given data."""
 
         assert self.model is not None, "Model generator must be defined"
@@ -51,7 +51,7 @@ class WekaBasedModel(BasePredictionModel, ABC):
         self.dataset = dataset
         self.model = model
 
-    def predict(self, state: GlobalView) -> int:
+    def predict(self, state: BaseView) -> int:
         # Convert the state to a Weka instance.
         instance = Instance.create_instance([int(i) for i in state.flatten()])
         instance.dataset = self.dataset

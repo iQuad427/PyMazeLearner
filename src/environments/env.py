@@ -4,17 +4,18 @@ from typing import Dict, Union
 
 import numpy as np
 
-from src.environments.models import Objects, GlobalView
-from src.environments.utils import manhattan_distance
-
-
-def _star(pos, data, include_all=False):
-    return data[pos[0], pos[1], :] if include_all else data[pos[0], pos[1]]
+from src.environments.models import Objects, BaseView
+from src.environments.observer.default import DefaultObserver
+from src.environments.utils import manhattan_distance, _star
 
 
 class Environment:
     def __init__(self, transition_matrix=None, starting_pos=None, max_steps=100, render_mode=None,
-                 enable_observation=True):
+                 enable_observation=True, observer=None):
+
+        if observer is None:
+            observer = DefaultObserver()
+        self.observer = observer
 
         # Game Information
         self.minotaur_img = None
@@ -109,9 +110,9 @@ class Environment:
 
         return not (0 <= agent_position[0] < shape[0] and 0 <= agent_position[1] < shape[1])
 
-    def _observe(self) -> Union[Dict[str, GlobalView], None]:
+    def _observe(self) -> Union[Dict[str, BaseView], None]:
         """
-        For each agent, return a GlobalView object containing the following information:
+        For each agent, return a BaseView object containing the following information:
         - walls_agent: 4x1 array of booleans, indicating whether there is a wall in the direction of the agent
         - walls_minotaur: 4x1 array of booleans, indicating whether there is a wall in the direction of the minotaur
         - distance_minotaur: Manhattan distance between the agent and the minotaur
@@ -119,38 +120,13 @@ class Environment:
         - direction_minotaur: 2x1 array of booleans, indicating the direction of the minotaur
         - direction_exit: 2x1 array of booleans, indicating the direction of the exit
 
-        :return: dictionary of GlobalView objects
+        :return: dictionary of BaseView objects
         """
 
         if not self.enable_observation:
             return None
 
-        walls_minotaur = np.array(
-            _star(self.pos[Objects.MINOTAUR], self.transition_matrix, include_all=True) == Objects.WALL
-        )  # can't go -> walls
-
-        observations = {}
-
-        for agent in self.possible_agents:
-            walls_agent = np.array(_star(self.pos[agent], self.transition_matrix, include_all=True) == Objects.WALL)
-
-            distance_minotaur = manhattan_distance(self.pos[Objects.MINOTAUR], self.pos[agent])
-            distance_exit = manhattan_distance(self.pos[Objects.EXIT], self.pos[agent])
-
-            # Return direction of minotaur and exit
-            direction_minotaur = np.sign(self.pos[Objects.MINOTAUR] - self.pos[agent])
-            direction_exit = np.sign(self.pos[Objects.EXIT] - self.pos[agent])
-
-            observations[agent] = GlobalView(
-                walls_agent=tuple(walls_agent),
-                walls_minotaur=tuple(walls_minotaur),
-                distance_minotaur=distance_minotaur,
-                distance_exit=distance_exit,
-                direction_minotaur=tuple(direction_minotaur),
-                direction_exit=tuple(direction_exit)
-            )
-
-        return observations
+        return self.observer.get_observation(self)
 
     def step(self, actions):
         """
