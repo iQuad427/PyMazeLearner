@@ -134,7 +134,7 @@ class Runner:
                 for agent in self.agents:
                     if rewards[agent] == 1:
                         if not self.did_already_win:
-                            # self.event_callback(self, first_win(ep, env.timestep))
+                            self.event_callback(self, first_win(ep, env.timestep))
                             self.did_already_win = True
                         self.step_to_win.append(env.timestep)
 
