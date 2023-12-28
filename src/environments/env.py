@@ -35,7 +35,7 @@ class Environment:
 
         # Exclude all objects that are not agents. (Minotaur is controlled by the environment and exit is static)
         self.possible_agents = [
-            agent for agent in starting_pos.keys() if agent != Objects.EXIT and agent != Objects.MINOTAUR
+            agent for agent in starting_pos.keys() if agent != Objects.EXIT and agent != Objects.MINOTAUR and agent != Objects.AGENT
         ]
         self.agents = None
 
@@ -325,7 +325,7 @@ class Environment:
         self._draw_maze(self.surface)
 
         # Draw players
-        for agent in [agent for agent in self.pos if agent is not Objects.EXIT]:
+        for agent in [agent for agent in self.pos if agent is not Objects.EXIT and agent is not Objects.AGENT]:
             x, y = self.pos[agent]
 
             # Render player image

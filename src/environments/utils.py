@@ -47,7 +47,7 @@ def grid_from_string(grid_str):
 def add_agents(starting_pos, n_agents):
     position = starting_pos[Objects.AGENT]
 
-    for i in range(1, n_agents):
+    for i in range(0, n_agents):
         starting_pos['player_' + chr(ord('A') + i)] = deepcopy(position)
 
     return starting_pos
