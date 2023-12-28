@@ -19,7 +19,6 @@ if __name__ == "__main__":
         n_agents=3,
         iterations=1_000,
         max_steps=1_000,
-        enable_observation=False,
     )
 
     runner.run()
