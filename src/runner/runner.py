@@ -19,7 +19,7 @@ class Runner:
         maze: str,
         agent_builder: Callable[[str, tuple], QLearner],
         convergence_count=300,
-        max_steps=10_000,
+        max_steps=1_000,
         sleep_time=None,
         iterations=10_000,
         render_mode=None,

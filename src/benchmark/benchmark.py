@@ -57,6 +57,7 @@ def benchmark_runnables(
 
     for _ in range(runs):
         for name, runnable_factory in runnables.items():
+            print(f"Running {name}... for {_ + 1} time")
             events = runnable_factory().run(
                 mazes, **(runnables_kwargs or {}).get(name, {})
             )
