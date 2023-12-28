@@ -70,7 +70,6 @@ class Environment:
         infos[Objects.MINOTAUR] = self.pos[Objects.MINOTAUR].copy()
 
         if self.render_mode == "human":
-            # TODO: self.draw_maze(), i.e. put the setting
             self.render()
 
         return observations, infos
@@ -132,7 +131,7 @@ class Environment:
 
         observations = {}
 
-        for agent in self.agents:
+        for agent in self.possible_agents:
             walls_agent = np.array(_star(self.pos[agent], self.transition_matrix, include_all=True) == Objects.WALL)
 
             distance_minotaur = manhattan_distance(self.pos[Objects.MINOTAUR], self.pos[agent])
@@ -179,21 +178,24 @@ class Environment:
         self._move_minotaur(steps=2)
 
         # Check termination conditions
-        terminations = {a: False for a in self.agents}
-        rewards = {a: 0 for a in self.agents}
+        terminations = {a: False for a in self.possible_agents}
+        rewards = {a: 0 for a in self.possible_agents}
 
         # Exit Maze Reward
         for agent in self.agents:
             if self._agent_on_goal(agent):
                 rewards[agent] = 1
                 terminations[agent] = True
-                # print(f"Player {agent} escaped!")
+                if self.render_mode == "human":
+                    print(f"Player {agent} escaped!")
 
         # Check minotaur for Punishment
         for agent in self.agents:
             if np.array_equal(self.pos[agent], self.pos[Objects.MINOTAUR]):
                 rewards[agent] = -1
                 terminations[agent] = True
+                if self.render_mode == "human":
+                    print(f"Player {agent} got eaten!")
 
         # Not Terminated Punishment
         for agent in self.agents:
@@ -223,16 +225,12 @@ class Environment:
 
         # Rendering
         if self.render_mode == "human":
-            # TODO: self.draw_players(), i.e. redraw the players
             self.render()
 
         return observations, rewards, terminations, truncations, infos
 
     def render(self):
         if self.render_mode == "human":
-            # TODO: render current state
-            # put the state history as variable in env to allow for animation of all states
-            # raise NotImplementedError("Human rendering not implemented yet")
             return self._render_gui()
         elif self.render_mode == "ascii":
             return self._render_ascii()
@@ -240,7 +238,6 @@ class Environment:
     def _render_ascii(self):
         matrix = deepcopy(self.transition_matrix)
 
-        # render_grid = np.zeros(tuple(matrix.shape[0:1]))
         item_grid = np.zeros(tuple(matrix.shape[0:2]))
 
         for item in self.pos:
@@ -310,7 +307,6 @@ class Environment:
 
             self.screen = pygame.display.set_mode(((dim_x + 1) * self.CELL_SIZE, (dim_y + 1) * self.CELL_SIZE))
             pygame.display.set_caption("Minotaur's Maze")
-            # self.clock = pygame.time.Clock()
 
             # Fill the background
             self.screen.fill(self.BG_COLOR)

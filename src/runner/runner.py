@@ -8,22 +8,23 @@ from tqdm import tqdm
 
 from src.environments.env import Environment
 from src.environments.models import Objects, GlobalView
-from src.environments.utils import grid_from_string
+from src.environments.utils import grid_from_string, add_agents
 from src.learners.qlearner import QLearner
 
 
 class Runner:
     def __init__(
-        self,
-        maze: str,
-        agent_builder: Callable[[str, tuple], QLearner],
-        convergence_count=300,
-        max_steps=10_000,
+            self,
+            maze: str,
+            agent_builder: Callable[[str, tuple], QLearner],
+            n_agents=1,
+            convergence_count=300,
+            max_steps=10_000,
             sleep_time=None,
-        iterations=10_000,
-        render_mode=None,
-        train=True,
-        action_logger: Callable[[str, GlobalView, int], None] = None,
+            iterations=10_000,
+            render_mode=None,
+            train=True,
+            action_logger: Callable[[str, GlobalView, int], None] = None,
     ):
         self.convergence_count = convergence_count
         self.iterations = iterations
@@ -31,7 +32,8 @@ class Runner:
         self.render_mode = render_mode
         self.train = train
         self.sleep_time = sleep_time
-        self.grid, self.starting_pos = grid_from_string(maze)
+        self.grid, starting_pos = grid_from_string(maze)
+        self.starting_pos = add_agents(starting_pos, n_agents)
         self.env = Environment(
             self.grid,
             self.starting_pos,
@@ -46,14 +48,14 @@ class Runner:
         self.action_logger = action_logger
 
     def configure(
-        self,
-        convergence_count=None,
-        iterations=None,
-        max_steps=None,
-        render_mode=None,
-        train=None,
+            self,
+            convergence_count=None,
+            iterations=None,
+            max_steps=None,
+            render_mode=None,
+            train=None,
             sleep_time=None,
-        action_logger=None,
+            action_logger=None,
     ):
         if convergence_count is not None:
             self.convergence_count = convergence_count
@@ -114,9 +116,10 @@ class Runner:
                 for agent in self.agents:
                     if rewards[agent] == 1:
                         self.step_to_win.append(env.timestep)
-                        if len(self.step_to_win) >= self.convergence_count*2:
+                        if len(self.step_to_win) >= self.convergence_count * 2:
                             # Check if the last 100 episodes have converged.
-                            if np.min(self.step_to_win[-self.convergence_count:]) == np.min(self.step_to_win[-self.convergence_count*2:-self.convergence_count]):
+                            if np.min(self.step_to_win[-self.convergence_count:]) == np.min(
+                                    self.step_to_win[-self.convergence_count * 2:-self.convergence_count]):
                                 logging.warning(f"[Just important] Converged after {ep} episodes")
                                 return True
                     else:
