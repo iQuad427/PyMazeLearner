@@ -25,11 +25,12 @@ class QLearner:
         )
 
     def choose_action_train(self, state, observation=None):
-        q = self.Q[state]
         if random.random() < self.eps:
             action = random.choice(ACTIONS)
         else:
+            q = self.Q[state]
             action = np.argmax(q)
+
         return action
 
     def choose_action_best(self, state):

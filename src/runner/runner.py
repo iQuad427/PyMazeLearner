@@ -24,7 +24,7 @@ class Runner:
         sleep_time=None,
         iterations=10_000,
         render_mode=None,
-            enable_observation: bool = True,
+        enable_observation: bool = True,
         train=True,
         action_logger: Callable[[str, BaseView, int], None] = None,
         observer: BaseObserver = None,
@@ -33,11 +33,11 @@ class Runner:
         self.convergence_count = convergence_count
         self.iterations = iterations
         self.max_steps = max_steps
-        self.enable_observation = enable_observation
         self.observer = observer
         self.render_mode = render_mode
         self.train = train
         self.sleep_time = sleep_time
+        self.enable_observation = enable_observation
         self.grid, starting_pos = grid_from_string(maze)
         self.starting_pos = add_agents(starting_pos, n_agents)
         self.env = self.build_env()
@@ -116,9 +116,10 @@ class Runner:
             # Take a step in the environment.
             observations, rewards, terminations, truncations, infos = env.step(actions)
 
-            for agent in observations:
-                if observations.get(agent) and self.action_logger:
-                    self.action_logger(agent, observations[agent], actions[agent])
+            if observations:
+                for agent in observations:
+                    if observations.get(agent) and self.action_logger:
+                        self.action_logger(agent, observations[agent], actions[agent])
 
             # Get the new states of all agents.
             new_states = self._get_states(infos)
@@ -164,7 +165,7 @@ class Runner:
     def _get_actions(self, states, observations):
         actions = {
             agent: self.agents[agent].choose_action_train(
-                states[agent], observations[agent]
+                states[agent], observations[agent] if observations else None
             )
             if self.train
             else self.agents[agent].choose_action_best(states[agent])
