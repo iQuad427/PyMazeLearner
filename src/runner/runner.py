@@ -8,6 +8,7 @@ from tqdm import tqdm
 
 from src.environments.env import Environment
 from src.environments.models import Objects, BaseView
+from src.environments.observer.base import BaseObserver
 from src.environments.utils import grid_from_string
 from src.learners.qlearner import QLearner
 
@@ -24,10 +25,12 @@ class Runner:
         render_mode=None,
         train=True,
         action_logger: Callable[[str, BaseView, int], None] = None,
+            observer: BaseObserver = None,
     ):
         self.convergence_count = convergence_count
         self.iterations = iterations
         self.max_steps = max_steps
+        self.observer = observer
         self.render_mode = render_mode
         self.train = train
         self.sleep_time = sleep_time
@@ -37,6 +40,7 @@ class Runner:
             self.starting_pos,
             max_steps=self.max_steps,
             render_mode=render_mode,
+            observer=self.observer,
         )
         self.agents = {
             agent: agent_builder(agent, self.grid.shape)
@@ -75,6 +79,7 @@ class Runner:
             self.starting_pos,
             max_steps=self.max_steps,
             render_mode=render_mode,
+            observer=self.observer,
         )
 
     def run(self):
