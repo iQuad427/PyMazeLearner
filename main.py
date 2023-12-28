@@ -1,4 +1,5 @@
 import time
+from copy import deepcopy
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -11,19 +12,32 @@ from src.environments.utils import grid_from_string
 from src.learners.qlearner import QLearner
 
 if __name__ == '__main__':
-    grid, starting_pos = grid_from_string(maze_8)
+    grid, starting_pos = grid_from_string(maze_1)
 
-    env = Environment(grid, starting_pos, max_steps=10_000, render_mode='human')
+    print(starting_pos)
+
+    starting_pos_agent = starting_pos['player_A']
+
+    starting_pos = {
+        **starting_pos,
+        'player_B': deepcopy(starting_pos_agent),
+        'player_C': deepcopy(starting_pos_agent),
+        'player_D': deepcopy(starting_pos_agent),
+    }
+
+    env = Environment(grid, starting_pos, max_steps=10_000)
+
+    print(env.possible_agents)
 
     agents = {agent: QLearner(grid.shape) for agent in env.possible_agents}
 
     step_to_win = []
-    for ep in tqdm(range(10000)):
+    for ep in tqdm(range(1_000)):
         observations, infos = env.reset()
         while True:
             states = {agent: tuple(np.concatenate((infos[agent], infos[Objects.MINOTAUR]))) for agent in agents}
             actions = {agent: agents[agent].choose_action_train(states[agent]) for agent in states}
-            # actions = {'player_A': solution.pop(0)}
+
             observations, rewards, terminations, truncations, infos = env.step(actions)
 
             new_states = {agent: tuple(np.concatenate((infos[agent], infos[Objects.MINOTAUR]))) for agent in agents}
@@ -42,13 +56,15 @@ if __name__ == '__main__':
             # time.sleep(0.1)
 
     env = Environment(grid, starting_pos, max_steps=10_000, render_mode='human')
+
     for ep in tqdm(range(1)):
         observations, infos = env.reset()
         while True:
             states = {agent: tuple(np.concatenate((infos[agent], infos[Objects.MINOTAUR]))) for agent in agents}
             actions = {agent: agents[agent].choose_action_best(states[agent]) for agent in states}
-            # actions = {'player_A': solution.pop(0)}
+
             observations, rewards, terminations, truncations, infos = env.step(actions)
+
             new_states = {agent: tuple(np.concatenate((infos[agent], infos[Objects.MINOTAUR]))) for agent in agents}
             if all(terminations.values()) or all(truncations.values()):
                 for agent in agents:
@@ -58,7 +74,7 @@ if __name__ == '__main__':
                         step_to_win.append(0)
                 break
 
-            time.sleep(0.1)
+            time.sleep(0.5)
 
     plt.plot(step_to_win)
     plt.show()

@@ -8,7 +8,7 @@ from tqdm import tqdm
 from src.environments.env import Environment
 from src.environments.models import Objects, BaseView
 from src.environments.observer.base import BaseObserver
-from src.environments.utils import grid_from_string
+from src.environments.utils import grid_from_string, add_agents
 from src.learners.qlearner import QLearner
 from src.runner.event import Event, first_win
 
@@ -18,6 +18,7 @@ class Runner:
         self,
         maze: str,
         agent_builder: Callable[[str, tuple], QLearner],
+        n_agents=1,
         convergence_count=300,
         max_steps=1_000,
         sleep_time=None,
@@ -37,7 +38,8 @@ class Runner:
         self.train = train
         self.sleep_time = sleep_time
         self.enable_observation = enable_observation
-        self.grid, self.starting_pos = grid_from_string(maze)
+        self.grid, starting_pos = grid_from_string(maze)
+        self.starting_pos = add_agents(starting_pos, n_agents)
         self.env = self.build_env()
         self.agents = {
             agent: agent_builder(agent, self.grid.shape)

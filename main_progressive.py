@@ -16,41 +16,51 @@ if __name__ == "__main__":
         enable_observation=False,
         maze=maze_7,
         agent_builder=lambda _, grid_shape: ProgressiveQLearner(grid_shape),
+        n_agents=3,
+        iterations=1_000,
+        max_steps=1_000,
     )
 
     runner.run()
-
-    symbolic_learners = defaultdict(lambda: SymbolicLearner(NaiveBayesModel))
 
     runner.configure(
-        train=False,
-        convergence_count=math.inf,
-        iterations=1_000,
-        action_logger=lambda agent, state, action: symbolic_learners[agent].log(
-            state, action
-        ),
+        render_mode="human",
+        sleep_time=0.2,
     )
 
     runner.run()
 
-    # Train the symbolic models.
-    for agent in symbolic_learners:
-        symbolic_learners[agent].train()
-
-    progressive_runner = Runner(
-        maze=maze_6,
-        agent_builder=lambda agent, grid_shape: ProgressiveQLearner(
-            grid_shape, predict=symbolic_learners[agent].predict
-        ),
-    )
-
-    progressive_runner.run()
-
-    progressive_runner.configure(
-        render_mode="human",
-        sleep_time=0.1,
-    )
-
-    progressive_runner.run()
+    # symbolic_learners = defaultdict(lambda: SymbolicLearner(NaiveBayesModel))
+    #
+    # runner.configure(
+    #     train=False,
+    #     convergence_count=math.inf,
+    #     iterations=1_000,
+    #     action_logger=lambda agent, state, action: symbolic_learners[agent].log(
+    #         state, action
+    #     ),
+    # )
+    #
+    # runner.run()
+    #
+    # # Train the symbolic models.
+    # for agent in symbolic_learners:
+    #     symbolic_learners[agent].train()
+    #
+    # progressive_runner = Runner(
+    #     maze=maze_6,
+    #     agent_builder=lambda agent, grid_shape: ProgressiveQLearner(
+    #         grid_shape, predict=symbolic_learners[agent].predict
+    #     ),
+    # )
+    #
+    # progressive_runner.run()
+    #
+    # progressive_runner.configure(
+    #     render_mode="human",
+    #     sleep_time=0.1,
+    # )
+    #
+    # progressive_runner.run()
 
     safe_stop_jvm()
