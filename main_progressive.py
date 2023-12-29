@@ -16,12 +16,12 @@ if __name__ == "__main__":
         enable_observation=False,
         maze=maze_7,
         agent_builder=lambda _, grid_shape: ProgressiveQLearner(grid_shape),
-        n_agents=3,
+        n_agents=1,
         iterations=1_000,
         max_steps=1_000,
     )
-
-    runner.run()
+    #
+    # runner.run()
 
     runner.configure(
         render_mode="human",
