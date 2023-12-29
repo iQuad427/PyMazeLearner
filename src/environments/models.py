@@ -1,5 +1,8 @@
 import abc
 from dataclasses import dataclass
+from typing import List, Union
+
+from src.environments.observer.observation.base import BaseObservation
 
 
 class Objects:
@@ -48,6 +51,23 @@ class DefaultView(BaseView):
             + (self.distance_minotaur, self.distance_exit)
             + self.direction_minotaur
             + self.direction_exit
+        )
+
+
+class GenericView(BaseView):
+    def __init__(self, observations: List[List[int]]):
+        self.observations = observations
+
+    def __hash__(self):
+        return hash(
+            (
+                obs for obs in self.observations
+            )
+        )
+
+    def flatten(self) -> tuple:
+        return tuple(
+            [x for obs in self.observations for x in obs]
         )
 
 

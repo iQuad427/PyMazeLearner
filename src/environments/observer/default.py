@@ -8,7 +8,7 @@ from src.environments.utils import manhattan_distance, _star
 
 
 class DefaultObserver(BaseObserver):
-    def get_observation(self, env) -> Dict[str, BaseView]:
+    def get_observations(self, env) -> Dict[str, BaseView]:
         walls_minotaur = np.array(
             _star(env.pos[Objects.MINOTAUR], env.transition_matrix, include_all=True)
             == Objects.WALL

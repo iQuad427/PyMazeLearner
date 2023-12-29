@@ -152,7 +152,7 @@ class Environment:
         if not self.enable_observation:
             return None
 
-        return self.observer.get_observation(self)
+        return self.observer.get_observations(self)
 
     def step(self, actions):
         """
