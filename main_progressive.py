@@ -2,13 +2,15 @@ import math
 from collections import defaultdict
 
 from src.environments.envs.examples import maze_6, maze_7, maze_15, maze_9, maze_8, maze_1, maze_2
+from src.environments.observer.observation.default import *
 from src.java_interop_utils import safe_init_jvm, safe_stop_jvm
 from src.learners.progressive_qlearner import ProgressiveQLearner
 from src.learners.symbolic_learner.learner import SymbolicLearner
 from src.learners.symbolic_learner.models.naive_bayes import NaiveBayesModel
-# from src.learners.symbolic_learner.models.weka.naive_bayes import NaiveBayesWekaModel
-# from src.learners.symbolic_learner.models.weka.part_dt import PDTWekaModel
+from src.learners.symbolic_learner.models.weka.naive_bayes import NaiveBayesWekaModel
+from src.learners.symbolic_learner.models.weka.part_dt import PDTWekaModel
 from src.runner.runner import Runner
+from src.environments.observer.generic import generic_default, GenericObserver
 
 from src.learners.symbolic_learner.models.random_forest import RandomForestModel
 from src.learners.symbolic_learner.models.neural_net import NeuralNetworkModel
@@ -16,6 +18,16 @@ from src.learners.symbolic_learner.models.neural_net import NeuralNetworkModel
 if __name__ == "__main__":
     # Initialize the JVM for Weka.
     safe_init_jvm()
+    observer = GenericObserver(
+    [
+        WallAgentObservation(),
+        WallMinoObservation(),
+        DistMinoObservation(),
+        DistExitObservation(),
+        DirMinoObservation(),
+        DirExitObservation()
+    ]
+)
 
     runner = Runner(
         enable_observation=False,
@@ -24,11 +36,12 @@ if __name__ == "__main__":
         n_agents=1,
         iterations=1_000,
         max_steps=1_000,
+        observer=observer
     )
     runner.run()
 
 
-    symbolic_learners = defaultdict(lambda: SymbolicLearner(NaiveBayesModel))
+    symbolic_learners = defaultdict(lambda: SymbolicLearner(PDTWekaModel))
     #
     runner.configure(
         train=False,
@@ -40,9 +53,16 @@ if __name__ == "__main__":
         ),
     )
     print("Running ProgressiveQLearner on maze 7.")
+    print(dict(symbolic_learners))
 
     runner.run()
 
+    # print(dict(symbolic_learners))
+    # his = [symbolic_learners[agent].history for agent in symbolic_learners]
+    # for key in his[0].keys():
+    #     print(his[0][key])
+    # print("History:", his)
+    # input("Press Enter to continue...")
     symbolic_learners = dict(symbolic_learners)
 
     # Train the symbolic models.
@@ -54,6 +74,7 @@ if __name__ == "__main__":
         agent_builder=lambda agent, grid_shape: ProgressiveQLearner(
             grid_shape, predict=symbolic_learners[agent].predict
         ),
+        render_mode="human"
     )
 
     progressive_runner.run()

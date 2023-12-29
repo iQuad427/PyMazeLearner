@@ -28,7 +28,7 @@ class DistMinoObservation(AgentBasedObservation):
 
 class DistExitObservation(AgentBasedObservation):
     def get_observation(self, env, agent):
-        return [manhattan_distance(env.pos[Objects.EXIT], env)]
+        return [manhattan_distance(env.pos[Objects.EXIT], env.pos[agent])]
 
 
 class DirMinoObservation(AgentBasedObservation):

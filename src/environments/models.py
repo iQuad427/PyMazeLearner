@@ -60,9 +60,7 @@ class GenericView(BaseView):
 
     def __hash__(self):
         return hash(
-            (
-                obs for obs in self.observations
-            )
+            self.flatten()
         )
 
     def flatten(self) -> tuple:

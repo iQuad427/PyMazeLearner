@@ -26,8 +26,18 @@ class GenericObserver(BaseObserver):
             observations[agent] = GenericView(
                 general_observations + agent_observations
             )
-
         return observations
+
+generic_default = GenericObserver(
+    [
+        WallAgentObservation(),
+        WallMinoObservation(),
+        DistMinoObservation(),
+        DistExitObservation(),
+        DirMinoObservation(),
+        DirExitObservation()
+    ]
+)
 
 
 if __name__ == "__main__":
@@ -42,4 +52,6 @@ if __name__ == "__main__":
         observer=observer
     )
     obs, info = env.reset()
-    print(obs['player_A'].flatten())
+    print(obs['player_A'], obs['player_A'].__hash__())
+    obs2, info2 = env.reset()
+    print(obs2['player_A'], obs2['player_A'].__hash__())

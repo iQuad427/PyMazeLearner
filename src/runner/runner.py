@@ -93,7 +93,7 @@ class Runner:
         )
 
     def run(self):
-        assert self.action_logger is  None or self.enable_observation, "Cannot log actions without observation"
+        assert self.action_logger is None or self.enable_observation, "Cannot log actions without observation"
 
         for ep in tqdm(range(self.iterations), desc="Q-Learning"):
             if self.force_stop:
