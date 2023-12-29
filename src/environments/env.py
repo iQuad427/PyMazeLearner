@@ -39,8 +39,8 @@ class Environment:
         self.starting_pos = starting_pos
         self.pos = None
 
-        self.previous_state = None
-        self.previous_actions = None
+        self.previous_state = starting_pos
+        self.previous_actions = {agent: 4 for agent in starting_pos.keys()}
 
         # Exclude all objects that are not agents. (Minotaur is controlled by the environment and exit is static)
         self.possible_agents = [
@@ -228,6 +228,7 @@ class Environment:
 
         infos = {agent: self.pos[agent] for agent in self.possible_agents}
         infos[Objects.MINOTAUR] = self.pos[Objects.MINOTAUR]
+
 
         state_comparison = [infos[agent] == self.previous_state[agent] for agent in self.possible_agents]
         action_comparison = [actions[agent] == self.previous_actions[agent] for agent in self.possible_agents]
