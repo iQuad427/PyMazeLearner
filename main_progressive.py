@@ -1,14 +1,17 @@
 import math
 from collections import defaultdict
 
-from src.environments.envs.examples import maze_6, maze_7
+from src.environments.envs.examples import maze_6, maze_7, maze_15, maze_9, maze_8
 from src.java_interop_utils import safe_init_jvm, safe_stop_jvm
 from src.learners.progressive_qlearner import ProgressiveQLearner
 from src.learners.symbolic_learner.learner import SymbolicLearner
 from src.learners.symbolic_learner.models.naive_bayes import NaiveBayesModel
-from src.learners.symbolic_learner.models.weka.naive_bayes import NaiveBayesWekaModel
-from src.learners.symbolic_learner.models.weka.part_dt import PDTWekaModel
+# from src.learners.symbolic_learner.models.weka.naive_bayes import NaiveBayesWekaModel
+# from src.learners.symbolic_learner.models.weka.part_dt import PDTWekaModel
 from src.runner.runner import Runner
+
+from src.learners.symbolic_learner.models.random_forest import RandomForestModel
+from src.learners.symbolic_learner.models.neural_net import NeuralNetworkModel
 
 if __name__ == "__main__":
     # Initialize the JVM for Weka.
@@ -25,7 +28,7 @@ if __name__ == "__main__":
     runner.run()
 
 
-    symbolic_learners = defaultdict(lambda: SymbolicLearner(NaiveBayesWekaModel))
+    symbolic_learners = defaultdict(lambda: SymbolicLearner(NeuralNetworkModel))
     #
     runner.configure(
         train=False,
@@ -47,7 +50,7 @@ if __name__ == "__main__":
         symbolic_learners[agent].train()
     #
     progressive_runner = Runner(
-        maze=maze_7,
+        maze=maze_8,
         agent_builder=lambda agent, grid_shape: ProgressiveQLearner(
             grid_shape, predict=symbolic_learners[agent].predict
         ),
