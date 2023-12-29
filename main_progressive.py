@@ -6,6 +6,8 @@ from src.java_interop_utils import safe_init_jvm, safe_stop_jvm
 from src.learners.progressive_qlearner import ProgressiveQLearner
 from src.learners.symbolic_learner.learner import SymbolicLearner
 from src.learners.symbolic_learner.models.naive_bayes import NaiveBayesModel
+from src.learners.symbolic_learner.models.weka.naive_bayes import NaiveBayesWekaModel
+from src.learners.symbolic_learner.models.weka.part_dt import PDTWekaModel
 from src.runner.runner import Runner
 
 if __name__ == "__main__":
@@ -16,51 +18,50 @@ if __name__ == "__main__":
         enable_observation=False,
         maze=maze_7,
         agent_builder=lambda _, grid_shape: ProgressiveQLearner(grid_shape),
-        n_agents=3,
+        n_agents=1,
         iterations=1_000,
         max_steps=1_000,
     )
+    runner.run()
+
+
+    symbolic_learners = defaultdict(lambda: SymbolicLearner(NaiveBayesWekaModel))
+    #
+    runner.configure(
+        train=False,
+        convergence_count=math.inf,
+        iterations=1_000,
+        enable_observation=True,
+        action_logger=lambda agent, state, action: symbolic_learners[agent].log(
+            state, action
+        ),
+    )
+    print("Running ProgressiveQLearner on maze 7.")
 
     runner.run()
 
-    runner.configure(
+    symbolic_learners = dict(symbolic_learners)
+
+    # Train the symbolic models.
+    for agent in symbolic_learners:
+        symbolic_learners[agent].train()
+    #
+    progressive_runner = Runner(
+        maze=maze_7,
+        agent_builder=lambda agent, grid_shape: ProgressiveQLearner(
+            grid_shape, predict=symbolic_learners[agent].predict
+        ),
+    )
+
+    progressive_runner.run()
+
+    progressive_runner.configure(
+        train=False,
+        convergence_count=math.inf,
         render_mode="human",
         sleep_time=0.2,
     )
 
-    runner.run()
-
-    # symbolic_learners = defaultdict(lambda: SymbolicLearner(NaiveBayesModel))
-    #
-    # runner.configure(
-    #     train=False,
-    #     convergence_count=math.inf,
-    #     iterations=1_000,
-    #     action_logger=lambda agent, state, action: symbolic_learners[agent].log(
-    #         state, action
-    #     ),
-    # )
-    #
-    # runner.run()
-    #
-    # # Train the symbolic models.
-    # for agent in symbolic_learners:
-    #     symbolic_learners[agent].train()
-    #
-    # progressive_runner = Runner(
-    #     maze=maze_6,
-    #     agent_builder=lambda agent, grid_shape: ProgressiveQLearner(
-    #         grid_shape, predict=symbolic_learners[agent].predict
-    #     ),
-    # )
-    #
-    # progressive_runner.run()
-    #
-    # progressive_runner.configure(
-    #     render_mode="human",
-    #     sleep_time=0.1,
-    # )
-    #
-    # progressive_runner.run()
+    progressive_runner.run()
 
     safe_stop_jvm()
