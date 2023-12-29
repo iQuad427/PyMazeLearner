@@ -19,15 +19,15 @@ if __name__ == "__main__":
     # Initialize the JVM for Weka.
     safe_init_jvm()
     observer = GenericObserver(
-    [
-        WallAgentObservation(),
-        WallMinoObservation(),
-        DistMinoObservation(),
-        DistExitObservation(),
-        DirMinoObservation(),
-        DirExitObservation()
-    ]
-)
+        [
+            WallAgentObservation(),
+            WallMinoObservation(),
+            DistMinoObservation(),
+            DistExitObservation(),
+            DirMinoObservation(),
+            DirExitObservation()
+        ]
+    )
 
     runner = Runner(
         enable_observation=False,
@@ -41,7 +41,7 @@ if __name__ == "__main__":
     runner.run()
 
 
-    symbolic_learners = defaultdict(lambda: SymbolicLearner(PDTWekaModel))
+    symbolic_learners = defaultdict(lambda: SymbolicLearner(NaiveBayesWekaModel))
     #
     runner.configure(
         train=False,
@@ -53,15 +53,14 @@ if __name__ == "__main__":
         ),
     )
     print("Running ProgressiveQLearner on maze 7.")
-    print(dict(symbolic_learners))
 
     runner.run()
 
     # print(dict(symbolic_learners))
-    # his = [symbolic_learners[agent].history for agent in symbolic_learners]
-    # for key in his[0].keys():
-    #     print(his[0][key])
-    # print("History:", his)
+    his = [symbolic_learners[agent].history for agent in symbolic_learners]
+    for key in his[0].keys():
+        print(his[0][key])
+    print(len(his[0]))
     # input("Press Enter to continue...")
     symbolic_learners = dict(symbolic_learners)
 
@@ -70,11 +69,12 @@ if __name__ == "__main__":
         symbolic_learners[agent].train()
     #
     progressive_runner = Runner(
-        maze=maze_2,
+        maze=maze_1,
         agent_builder=lambda agent, grid_shape: ProgressiveQLearner(
             grid_shape, predict=symbolic_learners[agent].predict
         ),
-        render_mode="human"
+        render_mode="human",
+        observer=observer
     )
 
     progressive_runner.run()

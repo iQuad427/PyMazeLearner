@@ -2,6 +2,8 @@ import abc
 from dataclasses import dataclass
 from typing import List, Union
 
+import numpy as np
+
 from src.environments.observer.observation.base import BaseObservation
 
 
@@ -60,13 +62,22 @@ class GenericView(BaseView):
 
     def __hash__(self):
         return hash(
-            self.flatten()
+            tuple(
+                [tuple(obs) for obs in self.observations]
+            )
         )
 
     def flatten(self) -> tuple:
         return tuple(
             [x for obs in self.observations for x in obs]
         )
+
+    def __eq__(self, other):
+        instance_test = isinstance(other, GenericView)
+        value_t = [all(np.array(self.observations[i]) == np.array(other.observations[i])) for i, obs in
+                   enumerate(self.observations)]
+        value_test = all(value_t)
+        return value_test and instance_test
 
 
 class Actions:
