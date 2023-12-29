@@ -56,12 +56,15 @@ class Runner:
         self,
         convergence_count=None,
         iterations=None,
+            enable_observation=None,
         max_steps=None,
         render_mode=None,
         train=None,
         sleep_time=None,
         action_logger=None,
     ):
+        if enable_observation is not None:
+            self.enable_observation = enable_observation
         if convergence_count is not None:
             self.convergence_count = convergence_count
         if iterations is not None:
@@ -90,6 +93,8 @@ class Runner:
         )
 
     def run(self):
+        assert self.action_logger is  None or self.enable_observation, "Cannot log actions without observation"
+
         for ep in tqdm(range(self.iterations), desc="Q-Learning"):
             if self.force_stop:
                 logging.warning("Early interruption due to force stop")

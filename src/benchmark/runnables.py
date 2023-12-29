@@ -61,6 +61,7 @@ class RunnableProgressiveQLearner(BaseRunnable):
 
                 runner = Runner(
                     maze=maze,
+                    enable_observation=True,
                     agent_builder=lambda agent, grid_shape: ProgressiveQLearner(
                         grid_shape,
                         # We only want to use the symbolic model once it has been trained.
@@ -87,6 +88,7 @@ class RunnableProgressiveQLearner(BaseRunnable):
 
                 for agent in symbolic_learners:
                     symbolic_learners[agent].train()
+
             except Exception as e:
                 print(
                     "An error occurred while running the ProgressiveQLearner on maze {0}.".format(
