@@ -118,13 +118,14 @@ class Runner:
             # Choose an action for each agent.
             actions = self._get_actions(states, observations)
 
-            # Take a step in the environment.
-            observations, rewards, terminations, truncations, infos = env.step(actions)
-
             if observations:
                 for agent in observations:
                     if observations.get(agent) and self.action_logger:
                         self.action_logger(agent, observations[agent], actions[agent])
+
+            # Take a step in the environment.
+            observations, rewards, terminations, truncations, infos = env.step(actions)
+
 
             # Get the new states of all agents.
             new_states = self._get_states(infos)
