@@ -29,7 +29,7 @@ class Environment:
         self.transition_matrix = transition_matrix
         self.shape = transition_matrix.shape
 
-        self.moves = np.array([[-1, 0], [0, 1], [1, 0], [0, -1], [0, 0]])
+        self.moves = np.array([[0, 0], [-1, 0], [0, 1], [1, 0], [0, -1]])
 
         # starting_pos = {
         #     minotaur: [x, y],
@@ -40,7 +40,7 @@ class Environment:
         self.pos = None
 
         self.previous_state = starting_pos
-        self.previous_actions = {agent: 4 for agent in starting_pos.keys()}
+        self.previous_actions = {agent: 0 for agent in starting_pos.keys()}
 
         # Exclude all objects that are not agents. (Minotaur is controlled by the environment and exit is static)
         self.possible_agents = [
@@ -80,6 +80,8 @@ class Environment:
 
         infos = {agent: self.pos[agent] for agent in self.possible_agents}
         infos[Objects.MINOTAUR] = self.pos[Objects.MINOTAUR].copy()
+        self.previous_state = deepcopy(self.starting_pos)
+        self.previous_actions = {agent: 0 for agent in self.starting_pos.keys()}
 
         if self.render_mode == "human":
             self.render()
@@ -177,8 +179,8 @@ class Environment:
             agent_position = self.pos[agent]
 
             if (
-                agent_action != 4
-                and _star(agent_position, self.transition_matrix)[agent_action]
+                agent_action != 0
+                and _star(agent_position, self.transition_matrix)[agent_action-1]
                 == Objects.EMPTY
             ):
                 self.pos[agent] += self.moves[agent_action]
@@ -230,16 +232,16 @@ class Environment:
         infos[Objects.MINOTAUR] = self.pos[Objects.MINOTAUR]
 
 
-        state_comparison = [infos[agent] == self.previous_state[agent] for agent in self.possible_agents]
-        action_comparison = [actions[agent] == self.previous_actions[agent] for agent in self.possible_agents]
+        state_comparison = [infos[agent] == self.previous_state[agent] for agent in infos]
+        action_comparison = [actions[agent] == self.previous_actions[agent] for agent in actions]
         if all(action_comparison) and all([all(i) for i in state_comparison]):
             for agent in self.agents:
                 terminations[agent] = True
                 rewards[agent] = -1
                 self.agents.remove(agent)
 
-        self.previous_state = infos
-        self.previous_actions = actions
+        self.previous_state = deepcopy(infos)
+        self.previous_actions = deepcopy(actions)
 
         # Rendering
         if self.render_mode == "human":

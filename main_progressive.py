@@ -1,7 +1,7 @@
 import math
 from collections import defaultdict
 
-from src.environments.envs.examples import maze_6, maze_7, maze_15, maze_9, maze_8
+from src.environments.envs.examples import maze_6, maze_7, maze_15, maze_9, maze_8, maze_1, maze_2
 from src.java_interop_utils import safe_init_jvm, safe_stop_jvm
 from src.learners.progressive_qlearner import ProgressiveQLearner
 from src.learners.symbolic_learner.learner import SymbolicLearner
@@ -19,7 +19,7 @@ if __name__ == "__main__":
 
     runner = Runner(
         enable_observation=False,
-        maze=maze_7,
+        maze=maze_1,
         agent_builder=lambda _, grid_shape: ProgressiveQLearner(grid_shape),
         n_agents=1,
         iterations=1_000,
@@ -28,7 +28,7 @@ if __name__ == "__main__":
     runner.run()
 
 
-    symbolic_learners = defaultdict(lambda: SymbolicLearner(NeuralNetworkModel))
+    symbolic_learners = defaultdict(lambda: SymbolicLearner(NaiveBayesModel))
     #
     runner.configure(
         train=False,
@@ -50,7 +50,7 @@ if __name__ == "__main__":
         symbolic_learners[agent].train()
     #
     progressive_runner = Runner(
-        maze=maze_8,
+        maze=maze_2,
         agent_builder=lambda agent, grid_shape: ProgressiveQLearner(
             grid_shape, predict=symbolic_learners[agent].predict
         ),
