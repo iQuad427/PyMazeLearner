@@ -13,11 +13,12 @@ from src.environments.envs.examples import (
     maze_10,
     maze_11,
     maze_12,
-    maze_13,
+    maze_13, maze_3, maze_14, maze_15,
 )
 from src.java_interop_utils import safe_init_jvm, safe_stop_jvm
 from src.learners.progressive_qlearner import ProgressiveQLearner
 from src.learners.symbolic_learner.learner import SymbolicLearner
+from src.learners.symbolic_learner.models.random_forest import RandomForestModel
 from src.learners.symbolic_learner.models.weka.naive_bayes import NaiveBayesWekaModel
 from src.runner.runner import Runner
 
@@ -25,11 +26,12 @@ if __name__ == "__main__":
     # Initialize the JVM for Weka.
     safe_init_jvm()
 
-    model = NaiveBayesWekaModel
+    model = RandomForestModel
 
     mazes = {
         "maze_1": maze_1,
         "maze_2": maze_2,
+        "maze_3": maze_3,
         "maze_4": maze_4,
         "maze_5": maze_5,
         "maze_6": maze_6,
@@ -40,6 +42,8 @@ if __name__ == "__main__":
         "maze_11": maze_11,
         "maze_12": maze_12,
         "maze_13": maze_13,
+        "maze_14": maze_14,
+        "maze_15": maze_15
     }
 
     # Write header to out.csv

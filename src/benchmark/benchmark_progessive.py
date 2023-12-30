@@ -13,7 +13,7 @@ from src.environments.envs.examples import (
     maze_10,
     maze_11,
     maze_12,
-    maze_13,
+    maze_13, maze_3,
 )
 from src.java_interop_utils import safe_init_jvm, safe_stop_jvm
 from src.learners.progressive_qlearner import ProgressiveQLearner
@@ -31,6 +31,7 @@ if __name__ == "__main__":
     mazes = {
         "maze_1": maze_1,
         "maze_2": maze_2,
+        "maze_3": maze_3,
         "maze_4": maze_4,
         "maze_5": maze_5,
         "maze_6": maze_6,

@@ -1,7 +1,7 @@
 import math
 from collections import defaultdict
 
-from src.environments.envs.examples import maze_6, maze_7, maze_15, maze_9, maze_8, maze_1, maze_2
+from src.environments.envs.examples import maze_6, maze_7, maze_15, maze_9, maze_8, maze_1, maze_2, maze_3
 from src.environments.observer.observation.default import *
 from src.java_interop_utils import safe_init_jvm, safe_stop_jvm
 from src.learners.progressive_qlearner import ProgressiveQLearner
@@ -31,22 +31,24 @@ if __name__ == "__main__":
 
     runner = Runner(
         enable_observation=False,
-        maze=maze_1,
+        maze=maze_3,
         agent_builder=lambda _, grid_shape: ProgressiveQLearner(grid_shape),
         n_agents=1,
-        iterations=1_000,
+        iterations=1_0000,
         max_steps=1_000,
-        observer=observer
+        observer=observer,
+        # render_mode="human",
+        # sleep_time=0.01
     )
     runner.run()
 
 
-    symbolic_learners = defaultdict(lambda: SymbolicLearner(NaiveBayesWekaModel))
+    symbolic_learners = defaultdict(lambda: SymbolicLearner(RandomForestModel))
     #
     runner.configure(
         train=False,
         convergence_count=math.inf,
-        iterations=1_000,
+        iterations=1_00,
         enable_observation=True,
         action_logger=lambda agent, state, action: symbolic_learners[agent].log(
             state, action
@@ -59,7 +61,7 @@ if __name__ == "__main__":
     # print(dict(symbolic_learners))
     his = [symbolic_learners[agent].history for agent in symbolic_learners]
     for key in his[0].keys():
-        print(his[0][key])
+        print(key.flatten(), his[0][key])
     print(len(his[0]))
     # input("Press Enter to continue...")
     symbolic_learners = dict(symbolic_learners)
@@ -69,7 +71,7 @@ if __name__ == "__main__":
         symbolic_learners[agent].train()
     #
     progressive_runner = Runner(
-        maze=maze_1,
+        maze=maze_3,
         agent_builder=lambda agent, grid_shape: ProgressiveQLearner(
             grid_shape, predict=symbolic_learners[agent].predict
         ),
