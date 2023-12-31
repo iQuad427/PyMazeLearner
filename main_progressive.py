@@ -7,13 +7,14 @@ from src.java_interop_utils import safe_init_jvm, safe_stop_jvm
 from src.learners.progressive_qlearner import ProgressiveQLearner
 from src.learners.symbolic_learner.learner import SymbolicLearner
 from src.learners.symbolic_learner.models.naive_bayes import NaiveBayesModel
-from src.learners.symbolic_learner.models.weka.naive_bayes import NaiveBayesWekaModel
-from src.learners.symbolic_learner.models.weka.part_dt import PDTWekaModel
+# from src.learners.symbolic_learner.models.weka.naive_bayes import NaiveBayesWekaModel
+# from src.learners.symbolic_learner.models.weka.part_dt import PDTWekaModel
 from src.runner.runner import Runner
 from src.environments.observer.generic import generic_default, GenericObserver
 
 from src.learners.symbolic_learner.models.random_forest import RandomForestModel
 from src.learners.symbolic_learner.models.neural_net import NeuralNetworkModel
+from src.learners.symbolic_learner.models.kNN import kNNModel
 
 if __name__ == "__main__":
     # Initialize the JVM for Weka.
@@ -43,7 +44,7 @@ if __name__ == "__main__":
     runner.run()
 
 
-    symbolic_learners = defaultdict(lambda: SymbolicLearner(RandomForestModel))
+    symbolic_learners = defaultdict(lambda: SymbolicLearner(kNNModel))
     #
     runner.configure(
         train=False,
@@ -75,7 +76,7 @@ if __name__ == "__main__":
         agent_builder=lambda agent, grid_shape: ProgressiveQLearner(
             grid_shape, predict=symbolic_learners[agent].predict
         ),
-        render_mode="human",
+        render_mode=None,
         observer=observer
     )
 
