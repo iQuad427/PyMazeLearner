@@ -19,14 +19,15 @@ from src.java_interop_utils import safe_init_jvm, safe_stop_jvm
 from src.learners.progressive_qlearner import ProgressiveQLearner
 from src.learners.qlearner import QLearner
 from src.learners.symbolic_learner.learner import SymbolicLearner
-from src.learners.symbolic_learner.models.weka.naive_bayes import NaiveBayesWekaModel
+# from src.learners.symbolic_learner.models.weka.naive_bayes import NaiveBayesWekaModel
+from src.learners.symbolic_learner.models.kNN import kNNModel
 from src.runner.runner import Runner
 
 if __name__ == "__main__":
     # Initialize the JVM for Weka.
     safe_init_jvm()
 
-    model = NaiveBayesWekaModel
+    model = kNNModel
 
     mazes = {
         "maze_1": maze_1,
