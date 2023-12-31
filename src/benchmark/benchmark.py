@@ -21,6 +21,8 @@ from src.environments.envs.examples import (
     maze_13,
     maze_3,
 )
+from src.java_interop_utils import safe_init_jvm, safe_stop_jvm
+from src.learners.symbolic_learner.models.naive_bayes import NaiveBayesModel
 from src.learners.symbolic_learner.models.random_forest import RandomForestModel
 from src.learners.symbolic_learner.models.weka.c45 import C45WekaModel
 from src.learners.symbolic_learner.models.weka.naive_bayes import NaiveBayesWekaModel
@@ -50,10 +52,14 @@ def retrieve_number_of_steps_and_episodes_per_maze(
 
 
 def run_benchmark(runnable_name, runnable_params, mazes, output_file, runs):
+    safe_init_jvm()
+
+    print("Running {0}.".format(runnable_name))
+    runnable = runnable_params.pop(RUNNABLE_FACTORY)
+    params = runnable_params
+
     for _ in range(runs):
-        for maze, event in runnable_params.pop(RUNNABLE_FACTORY)().run(
-            mazes, **runnable_params
-        ):
+        for maze, event in runnable().run(mazes, **params):
             with open(output_file, "a") as f:
                 f.write(
                     "{0},{1},{2},{3}\n".format(
@@ -64,6 +70,7 @@ def run_benchmark(runnable_name, runnable_params, mazes, output_file, runs):
                     )
                 )
 
+    safe_stop_jvm()
 
 def benchmark_runnables(
     mazes: Dict[str, str],
@@ -98,6 +105,7 @@ def benchmark_runnables(
 
 
 if __name__ == "__main__":
+
     _mazes = {
         "maze_1": maze_1,
         "maze_2": maze_2,
@@ -141,11 +149,13 @@ if __name__ == "__main__":
                 MODEL_FACTORY: NaiveBayesWekaModel,
                 CUMLATIVE: True,
             },
-            "ProgressiveQLearner - RandomForestModel - Cumulative": {
+            "ProgressiveQLearner - NaiveBayesModel - Cumulative": {
                 RUNNABLE_FACTORY: RunnableProgressiveQLearner,
-                MODEL_FACTORY: RandomForestModel,
+                MODEL_FACTORY: NaiveBayesModel,
                 CUMLATIVE: True,
             },
         },
         runs=5,
     )
+
+

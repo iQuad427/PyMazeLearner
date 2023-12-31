@@ -56,7 +56,6 @@ class RunnableProgressiveQLearner(BaseRunnable):
 
         for index, (name, maze) in enumerate(mazes.items()):
             try:
-
                 def log_first_win_and_stop(env, event):
                     if event.name == "first_win":
                         self.event = event
@@ -72,10 +71,10 @@ class RunnableProgressiveQLearner(BaseRunnable):
                     event_callback=log_first_win_and_stop,
                 )
 
+                runner.run()
+
                 if not cumulative:
                     symbolic_learners.clear()
-
-                runner.run()
 
                 yield name, self.event
                 self.event = None
@@ -84,6 +83,7 @@ class RunnableProgressiveQLearner(BaseRunnable):
                     train=False,
                     convergence_count=math.inf,
                     iterations=1_000,
+                    enable_observation=True,
                     action_logger=lambda agent, state, action: symbolic_learners[
                         agent
                     ].log(state, action),
@@ -96,8 +96,6 @@ class RunnableProgressiveQLearner(BaseRunnable):
 
             except Exception as e:
                 print(
-                    "An error occurred while running the ProgressiveQLearner on maze {0}.".format(
-                        maze
-                    )
+                   f"An error occurred while running the ProgressiveQLearner on maze {maze} for model {model_factory.__name__}."
                 )
                 print(e)

@@ -14,16 +14,26 @@ class WekaBasedModel(BasePredictionModel, ABC):
         self.dataset = None
 
     @staticmethod
-    def _convert_to_weka_dataset(features, labels):
+    def _convert_to_weka_dataset(features, labels, names=None):
         """Converts the given data to a Weka dataset."""
 
         treated_features = [list(map(int, gv)) for gv in features]
         treated_labels = [str(label) for label in labels]
 
+
+        print(names)
+
+        attributes = [
+            Attribute.create_numeric(names[i] if names else f"feature_{i}")
+            for i in range(len(features[0]))
+        ]
+
+
+        attributes += [Attribute.create_nominal("label", list(map(str, ACTIONS)))]
+
         dataset = Instances.create_instances(
             "source",
-            [Attribute.create_numeric(f"feature_{i}") for i in range(len(features[0]))]
-            + [Attribute.create_nominal("label", list(map(str, ACTIONS)))],
+            attributes,
             capacity=len(features),
         )
 
@@ -44,7 +54,7 @@ class WekaBasedModel(BasePredictionModel, ABC):
         features = [gv.flatten() for gv in keys]
         labels = [max(source[gv], key=source[gv].get) for gv in keys]
 
-        dataset = self._convert_to_weka_dataset(features, labels)
+        dataset = self._convert_to_weka_dataset(features, labels, names=keys[0].names())
         model = self.model[0](**self.model[1])
 
         model.build_classifier(dataset)

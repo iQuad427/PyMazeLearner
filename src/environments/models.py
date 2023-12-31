@@ -1,10 +1,8 @@
 import abc
 from dataclasses import dataclass
-from typing import List, Union
+from typing import List
 
 import numpy as np
-
-from src.environments.observer.observation.base import BaseObservation
 
 
 class Objects:
@@ -18,6 +16,14 @@ class Objects:
 class BaseView(abc.ABC):
     @abc.abstractmethod
     def flatten(self) -> tuple:
+        pass
+
+    @abc.abstractmethod
+    def names(self) -> tuple:
+        pass
+
+    @abc.abstractmethod
+    def __eq__(self, other):
         pass
 
     @abc.abstractmethod
@@ -55,6 +61,33 @@ class DefaultView(BaseView):
             + self.direction_exit
         )
 
+    def names(self) -> tuple:
+        return (
+            "walls_agent_1",
+            "walls_agent_2",
+            "walls_agent_3",
+            "walls_agent_4",
+            "walls_minotaur_1",
+            "walls_minotaur_2",
+            "walls_minotaur_3",
+            "walls_minotaur_4",
+            "distance_minotaur",
+            "distance_exit",
+            "direction_minotaur_1",
+            "direction_minotaur_2",
+            "direction_exit_1",
+            "direction_exit_2",
+        )
+
+    def __eq__(self, other):
+        return (
+            self.walls_agent == other.walls_agent
+            and self.walls_minotaur == other.walls_minotaur
+            and self.distance_minotaur == other.distance_minotaur
+            and self.distance_exit == other.distance_exit
+            and self.direction_minotaur == other.direction_minotaur
+            and self.direction_exit == other.direction_exit
+        )
 
 class GenericView(BaseView):
     def __init__(self, observations: List[List[int]]):
