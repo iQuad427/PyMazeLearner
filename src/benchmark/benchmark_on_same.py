@@ -18,15 +18,14 @@ from src.environments.envs.examples import (
 from src.java_interop_utils import safe_init_jvm, safe_stop_jvm
 from src.learners.progressive_qlearner import ProgressiveQLearner
 from src.learners.symbolic_learner.learner import SymbolicLearner
-from src.learners.symbolic_learner.models.random_forest import RandomForestModel
-from src.learners.symbolic_learner.models.weka.naive_bayes import NaiveBayesWekaModel
+from src.learners.symbolic_learner.models.weka.c45 import C45WekaModel
 from src.runner.runner import Runner
 
 if __name__ == "__main__":
     # Initialize the JVM for Weka.
     safe_init_jvm()
 
-    model = RandomForestModel
+    model = C45WekaModel
 
     mazes = {
         "maze_1": maze_1,

@@ -16,7 +16,7 @@ class BaseRunnable(metaclass=abc.ABCMeta):
 
 class RunnableQLearner(BaseRunnable):
     def __init__(self):
-        self.events = {}
+        self.event = None
 
     def run(self, mazes, **kwargs):
         for maze in mazes:
@@ -25,7 +25,7 @@ class RunnableQLearner(BaseRunnable):
 
                 def log_first_win_and_stop(env, event):
                     if event.name == "first_win":
-                        self.events[maze] = event
+                        self.event = event
                         env.force_stop = True
 
                 runner = Runner(
@@ -35,6 +35,9 @@ class RunnableQLearner(BaseRunnable):
                 )
 
                 runner.run()
+
+                yield maze, self.event
+                self.event = None
             except Exception as e:
                 print(
                     "An error occurred while running the QLearner on maze {0}.".format(
@@ -42,22 +45,21 @@ class RunnableQLearner(BaseRunnable):
                     )
                 )
                 print(e)
-        return self.events
 
 
 class RunnableProgressiveQLearner(BaseRunnable):
     def __init__(self):
-        self.events = {}
+        self.event = None
 
     def run(self, mazes=None, model_factory=None, cumulative=False, **kwargs):
         symbolic_learners = defaultdict(lambda: SymbolicLearner(model_factory))
 
         for index, (name, maze) in enumerate(mazes.items()):
             try:
+
                 def log_first_win_and_stop(env, event):
                     if event.name == "first_win":
-                        self.events[name] = event
-                        # Here we do not want to stop the environment, because we want to train the symbolic model.
+                        self.event = event
 
                 runner = Runner(
                     maze=maze,
@@ -75,13 +77,16 @@ class RunnableProgressiveQLearner(BaseRunnable):
 
                 runner.run()
 
+                yield name, self.event
+                self.event = None
+
                 runner.configure(
                     train=False,
                     convergence_count=math.inf,
                     iterations=1_000,
-                    action_logger=lambda agent, state, action: symbolic_learners[agent].log(
-                        state, action
-                    ),
+                    action_logger=lambda agent, state, action: symbolic_learners[
+                        agent
+                    ].log(state, action),
                 )
 
                 runner.run()
@@ -96,4 +101,3 @@ class RunnableProgressiveQLearner(BaseRunnable):
                     )
                 )
                 print(e)
-        return self.events

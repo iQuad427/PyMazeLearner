@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import Dict, Tuple, List, Any
+from typing import Dict, Tuple, Any
 
 from weka.core.dataset import Instances, Attribute, Instance
 
@@ -8,7 +8,7 @@ from src.learners.symbolic_learner.models.base import BasePredictionModel
 
 
 class WekaBasedModel(BasePredictionModel, ABC):
-    model: Tuple[Any, List] = None
+    model: Tuple[Any, Dict] = None
 
     def __init__(self):
         self.dataset = None
@@ -38,14 +38,15 @@ class WekaBasedModel(BasePredictionModel, ABC):
 
     def train(self, source: Dict[BaseView, Dict[int, int]]):
         """Trains a model using the given data."""
-
         assert self.model is not None, "Model generator must be defined"
 
-        features = [gv.flatten() for gv in source.keys()]
-        labels = [max(source[gv], key=source[gv].get) for gv in source.keys()]
+        keys = list(source.keys())
+        features = [gv.flatten() for gv in keys]
+        labels = [max(source[gv], key=source[gv].get) for gv in keys]
 
         dataset = self._convert_to_weka_dataset(features, labels)
         model = self.model[0](**self.model[1])
+
         model.build_classifier(dataset)
 
         self.dataset = dataset
@@ -55,5 +56,4 @@ class WekaBasedModel(BasePredictionModel, ABC):
         # Convert the state to a Weka instance.
         instance = Instance.create_instance([int(i) for i in state.flatten()])
         instance.dataset = self.dataset
-
         return int(self.model.classify_instance(instance))

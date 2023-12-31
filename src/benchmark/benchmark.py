@@ -1,3 +1,4 @@
+import multiprocessing
 from collections import defaultdict
 from typing import Dict, Callable
 
@@ -18,9 +19,15 @@ from src.environments.envs.examples import (
     maze_11,
     maze_12,
     maze_13,
+    maze_3,
 )
-from src.learners.symbolic_learner.models.c45 import C45Model
-from src.learners.symbolic_learner.models.naive_bayes import NaiveBayesModel
+from src.learners.symbolic_learner.models.random_forest import RandomForestModel
+from src.learners.symbolic_learner.models.weka.c45 import C45WekaModel
+from src.learners.symbolic_learner.models.weka.naive_bayes import NaiveBayesWekaModel
+
+RUNNABLE_FACTORY = "runnable_factory"
+MODEL_FACTORY = "model_factory"
+CUMLATIVE = "cumulative"
 
 
 def retrieve_number_of_steps_and_episodes_per_maze(
@@ -42,45 +49,59 @@ def retrieve_number_of_steps_and_episodes_per_maze(
     return number_of_steps, number_of_episodes
 
 
+def run_benchmark(runnable_name, runnable_params, mazes, output_file, runs):
+    for _ in range(runs):
+        for maze, event in runnable_params.pop(RUNNABLE_FACTORY)().run(
+            mazes, **runnable_params
+        ):
+            with open(output_file, "a") as f:
+                f.write(
+                    "{0},{1},{2},{3}\n".format(
+                        runnable_name,
+                        maze,
+                        event.data["number_of_steps"],
+                        event.data["episodes"],
+                    )
+                )
+
+
 def benchmark_runnables(
     mazes: Dict[str, str],
-    runnables: Dict[str, Callable[[], BaseRunnable]],
-    runnables_kwargs: Dict[str, Dict] = None,
+    runnables: Dict[str, Dict],
     runs=5,
+    output_file=None,
 ):
-    number_of_steps = defaultdict(lambda: defaultdict(list))
-    number_of_episodes = defaultdict(lambda: defaultdict(list))
+    output_file = output_file or "out.csv"
+    with open(output_file, "w") as f:
+        f.write("model,maze,steps,episodes\n")
 
-    for _ in range(runs):
-        for name, runnable_factory in runnables.items():
-            print(f"Running {name}... for {_ + 1} time")
-            events = runnable_factory().run(
-                mazes, **(runnables_kwargs or {}).get(name, {})
-            )
+    processes = []
 
-            for maze, event in events.items():
-                number_of_steps[name][maze].append(event.data["number_of_steps"])
-                number_of_episodes[name][maze].append(event.data["episodes"])
+    for name, runnable_params in runnables.items():
+        # Create a new process for each runnable
+        p = multiprocessing.Process(
+            target=run_benchmark,
+            args=(
+                name,
+                runnable_params,
+                mazes,
+                output_file,
+                runs,
+            ),
+        )
+        processes.append(p)
+        p.start()
 
-    # Beautiful print
-    print("Model\tMaze\tSteps\tEpisodes")
-    for model, mazes in number_of_steps.items():
-        for maze, steps in mazes.items():
-            print(
-                "{0}\t{1}\t{2}\t{3}".format(
-                    model,
-                    maze,
-                    sum(steps) / len(steps),
-                    sum(number_of_episodes[model][maze])
-                    / len(number_of_episodes[model][maze]),
-                )
-            )
+    # Wait for all processes to finish
+    for p in processes:
+        p.join()
 
 
 if __name__ == "__main__":
     _mazes = {
         "maze_1": maze_1,
         "maze_2": maze_2,
+        "maze_3": maze_3,
         "maze_4": maze_4,
         "maze_5": maze_5,
         "maze_6": maze_6,
@@ -95,22 +116,35 @@ if __name__ == "__main__":
     benchmark_runnables(
         _mazes,
         {
-            "QLearner": RunnableQLearner,
-            "ProgressiveQLearner - C45": RunnableProgressiveQLearner,
-            "ProgressiveQLearner - Naive bayes": RunnableProgressiveQLearner,
-            "ProgressiveQLearner - C45 - Cumulative": RunnableProgressiveQLearner,
-            "ProgressiveQLearner - Naive bayes - Cumulative": RunnableProgressiveQLearner,
-        },
-        runnables_kwargs={
-            "ProgressiveQLearner - C45": {"model_factory": C45Model},
-            "ProgressiveQLearner - Naive bayes": {"model_factory": NaiveBayesModel},
-            "ProgressiveQLearner - C45 - Cumulative": {
-                "model_factory": C45Model,
-                "cumulative": True,
+            "QLearner": {
+                RUNNABLE_FACTORY: RunnableQLearner,
             },
-            "ProgressiveQLearner - Naive bayes - Cumulative": {
-                "model_factory": NaiveBayesModel,
-                "cumulative": True,
+            "ProgressiveQLearner - C45Weka": {
+                RUNNABLE_FACTORY: RunnableProgressiveQLearner,
+                MODEL_FACTORY: C45WekaModel,
+            },
+            "ProgressiveQLearner - NaiveBayesWekaModel": {
+                RUNNABLE_FACTORY: RunnableProgressiveQLearner,
+                MODEL_FACTORY: NaiveBayesWekaModel,
+            },
+            "ProgressiveQLearner - RandomForestModel": {
+                RUNNABLE_FACTORY: RunnableProgressiveQLearner,
+                MODEL_FACTORY: RandomForestModel,
+            },
+            "ProgressiveQLearner - C45Weka - Cumulative": {
+                RUNNABLE_FACTORY: RunnableProgressiveQLearner,
+                MODEL_FACTORY: C45WekaModel,
+                CUMLATIVE: True,
+            },
+            "ProgressiveQLearner - NaiveBayesWekaModel - Cumulative": {
+                RUNNABLE_FACTORY: RunnableProgressiveQLearner,
+                MODEL_FACTORY: NaiveBayesWekaModel,
+                CUMLATIVE: True,
+            },
+            "ProgressiveQLearner - RandomForestModel - Cumulative": {
+                RUNNABLE_FACTORY: RunnableProgressiveQLearner,
+                MODEL_FACTORY: RandomForestModel,
+                CUMLATIVE: True,
             },
         },
         runs=5,

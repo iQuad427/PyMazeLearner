@@ -4,4 +4,5 @@ from src.learners.symbolic_learner.models.weka.base import WekaBasedModel
 
 
 class C45WekaModel(WekaBasedModel):
-    model = (Classifier, dict(classname="weka.classifiers.trees.J48"))
+    # Disable pruning.
+    model = (Classifier, dict(classname="weka.classifiers.trees.J48", options=["-U"]))
