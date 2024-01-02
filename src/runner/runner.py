@@ -93,9 +93,12 @@ class Runner:
         )
 
     def run(self):
-        assert (
-            self.action_logger is None or self.enable_observation
-        ), "Cannot log actions without observation"
+        """
+
+        Returns: True in case of convergence on a solution, False otherwise
+
+        """
+        assert self.action_logger is None or self.enable_observation, "Cannot log actions without observation"
 
         for ep in tqdm(range(self.iterations), desc="Q-Learning"):
             if self.force_stop:
@@ -106,7 +109,9 @@ class Runner:
 
             if self._run_once(self.env, ep, infos, observations):
                 logging.warning("Early interruption due to convergence")
-                break
+                return True
+
+        return False
 
     def _run_once(self, env, ep, infos, observations):
         while True:
