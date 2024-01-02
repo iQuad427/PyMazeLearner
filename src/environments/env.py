@@ -167,7 +167,7 @@ class Environment:
         - 3 : left
         - 4 : delay
 
-        MOVES: list = [[-1, 0], [0, 1], [1, 0], [0, -1], [0, 0]]
+        MOVES: list = [[0, 0], [-1, 0], [0, 1], [1, 0], [0, -1]]
 
         :param actions: dictionary of actions to take for each agent
         :return:
@@ -230,7 +230,6 @@ class Environment:
 
         infos = {agent: self.pos[agent] for agent in self.possible_agents}
         infos[Objects.MINOTAUR] = self.pos[Objects.MINOTAUR]
-
 
         state_comparison = [infos[agent] == self.previous_state[agent] for agent in infos]
         action_comparison = [actions[agent] == self.previous_actions[agent] for agent in actions]

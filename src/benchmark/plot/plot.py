@@ -2,48 +2,122 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 
-def read_csv():
-    df = pd.read_csv("benchmark_31_12_2023.csv")
-    df_2 = pd.read_csv("out.csv")
-    return pd.concat([df, df_2])
+def concat(df_1, df_2):
+    return pd.concat([df_1, df_2])
+
+
+def read_csv(file):
+    return pd.read_csv(file)
 
 
 if __name__ == '__main__':
-    data = read_csv()
+    data = read_csv("asset/random_forest_bias.csv")
 
-    # Sort by maze number
+    # Pre-process data
+
+    # 1. Sort by maze number
     data["maze"] = data["maze"].apply(lambda x: int(x.split("_")[1]))
     data = data.sort_values("maze")
 
-    # Remove the model containing random forest
-    data = data[~data["model"].str.contains("RandomForest")]
+    # 2. Remove unwanted models
+    random_forest = data[data["model"].str.contains("Random Forest")]
+    data = data[~data["model"].str.contains("RandomForestModel")]
+    data = data[~data["model"].str.contains("Random Forest")]
 
-    # Recover all lines with QLearner as model
-    q_learner = data[data["model"] == "QLearner"]
-    progressive_q_learner = data[data["model"].str.contains("ProgressiveQLearner")]
+    # Save data in different data frames
 
-    cumulative_q_learner = data[data["model"].str.contains("Cumulative")]
-    single_trained_learner = progressive_q_learner[~progressive_q_learner["model"].str.contains("Cumulative")]
+    # 1. QLearner (is)
+    q_learner = data[(data["model"] == "QLearner") | (data["model"] == "Qlearner")]
 
-    # Bar plot of episodes per maze and per model for QLearner and SingleTrainedLearner
-    # Merge the two dataframes q_learner and single_trained_learner using concat
+    # 2. ProgressiveQLearner (contains)
+    progressive_learner = data[data["model"].str.contains("ProgressiveQLearner")]
 
-    single_vs_q_learner = pd.concat([q_learner, single_trained_learner])
+    # 3. Cumulative vs. Single trained
+    cumulative_learner = progressive_learner[progressive_learner["model"].str.contains("Cumulative")]
+    single_learner = progressive_learner[~progressive_learner["model"].str.contains("Cumulative")]
 
-    single_vs_q_learner.groupby(["maze", "model"])["steps"].mean().unstack().plot.bar()
-    plt.savefig("single_vs_q_learner.png")
-    plt.show()
+    # 4. Weka vs New Models (contains)
+    weka = progressive_learner[progressive_learner["model"].str.contains("Weka")]
+    not_weka = progressive_learner[~progressive_learner["model"].str.contains("Weka")]
 
-    cumulative_vs_q_learner = pd.concat([q_learner, cumulative_q_learner])
+    # Plot data (always compare to QLearner, plotting concat)
 
-    cumulative_vs_q_learner.groupby(["maze", "model"])["steps"].mean().unstack().plot.bar()
-    plt.savefig("cumulative_vs_q_learner.png")
-    plt.show()
+    # 0. Example plot (bar plot with width = 0.5)
+    def plot_comparison(df_1, df_2, column, title):
+        df = pd.concat([df_1, df_2, q_learner])
 
-    # # Bar plot of episodes per maze and per model
-    # data.groupby(["maze", "model"])["episodes"].mean().unstack().plot.bar()
-    # plt.show()
-    #
-    # # Bar plot of steps per maze and per model
-    # data.groupby(["maze", "model"])["steps"].mean().unstack().plot.bar()
-    # plt.show()
+        # Plot
+        df.groupby(["maze", "model"])[
+            column
+        ].mean().unstack().plot.bar(
+            figsize=(10, 5),
+            width=0.5,
+            title=title,
+            xlabel="maze",
+            ylabel=column,
+        )
+        plt.show()
+
+    # 1. Compare episodes between QLearner and ProgressiveQLearner with Weka non-cumulative
+    plot_comparison(
+        q_learner,
+        # Weka but without cumulative
+        weka[~weka["model"].str.contains("Cumulative")],
+        "episodes",
+        title="Episode comparison between QLearner and ProgressiveQLearner with Weka non-cumulative"
+    )
+
+    # 2. Compare episodes between QLearner and ProgressiveQLearner with Weka cumulative
+    plot_comparison(
+        q_learner,
+        # Weka but with cumulative
+        weka[weka["model"].str.contains("Cumulative")],
+        "episodes",
+        title="Episode comparison between QLearner and ProgressiveQLearner with Weka cumulative"
+    )
+
+    # 3. Compare episodes between QLearner and ProgressiveQLearner with new models non-cumulative
+    plot_comparison(
+        q_learner,
+        # New models but without cumulative
+        not_weka[~not_weka["model"].str.contains("Cumulative")],
+        "episodes",
+        title="Episode comparison between QLearner and ProgressiveQLearner with new models non-cumulative"
+    )
+
+    # 4. Compare episodes between QLearner and ProgressiveQLearner with new models cumulative
+    plot_comparison(
+        q_learner,
+        # New models but with cumulative
+        not_weka[not_weka["model"].str.contains("Cumulative")],
+        "episodes",
+        title="Episode comparison between QLearner and ProgressiveQLearner with new models cumulative"
+    )
+
+    # 5. Compare ProgressiveQLearner with Weka and non-Weka non-cumulative
+    plot_comparison(
+        # Weka
+        weka[~weka["model"].str.contains("Cumulative")],
+        # New models
+        not_weka[~not_weka["model"].str.contains("Cumulative")],
+        "episodes",
+        title="Episode comparison between ProgressiveQLearner with Weka and non-Weka"
+    )
+
+    # 6. Compare ProgressiveQLearner with Weka and non-Weka cumulative
+    plot_comparison(
+        # Weka
+        weka[weka["model"].str.contains("Cumulative")],
+        # New models
+        not_weka[not_weka["model"].str.contains("Cumulative")],
+        "episodes",
+        title="Episode comparison between ProgressiveQLearner with Weka and non-Weka cumulative"
+    )
+
+    plot_comparison(
+        random_forest,
+        q_learner,
+        "episodes",
+        title="Episode comparison between QLearner and RandomForestModel"
+    )
+

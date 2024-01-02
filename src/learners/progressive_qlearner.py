@@ -38,7 +38,9 @@ class ProgressiveQLearner(QLearner):
             action = self.predict(observation)
 
             for other_action in ACTIONS:
+                print("other_action, action:", other_action, action)
                 if other_action != action:
+                    print("yo")
                     self.Q[state][other_action] = self.bias
 
             return action
