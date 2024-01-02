@@ -1,0 +1,131 @@
+model,maze,steps,episodes
+QLearner,maze_1,126,281
+QLearner,maze_1,158,278
+QLearner,maze_1,104,282
+QLearner,maze_1,137,281
+QLearner,maze_1,175,290
+QLearner,maze_2,73,127
+QLearner,maze_2,78,123
+QLearner,maze_2,70,135
+QLearner,maze_2,85,132
+QLearner,maze_2,74,132
+QLearner,maze_3,152,167
+QLearner,maze_3,141,166
+QLearner,maze_3,207,174
+QLearner,maze_3,199,173
+QLearner,maze_3,150,181
+QLearner,maze_4,972,731
+QLearner,maze_4,220,760
+QLearner,maze_4,252,758
+QLearner,maze_4,257,800
+QLearner,maze_4,324,780
+QLearner,maze_5,29,584
+QLearner,maze_5,33,552
+QLearner,maze_5,38,540
+QLearner,maze_5,32,534
+QLearner,maze_5,36,547
+QLearner,maze_6,183,447
+QLearner,maze_6,339,441
+QLearner,maze_6,178,447
+QLearner,maze_6,173,450
+QLearner,maze_6,164,435
+QLearner,maze_7,116,260
+QLearner,maze_7,106,241
+QLearner,maze_7,134,239
+QLearner,maze_7,171,237
+QLearner,maze_7,115,243
+QLearner,maze_8,224,455
+QLearner,maze_8,94,454
+QLearner,maze_8,181,450
+QLearner,maze_8,214,479
+QLearner,maze_8,123,456
+QLearner,maze_9,146,607
+QLearner,maze_9,101,590
+QLearner,maze_9,169,611
+QLearner,maze_9,149,584
+QLearner,maze_9,313,612
+QLearner,maze_10,38,920
+QLearner,maze_10,79,913
+QLearner,maze_10,39,938
+QLearner,maze_10,104,917
+QLearner,maze_10,34,940
+QLearner,maze_11,75,2816
+QLearner,maze_11,65,2854
+QLearner,maze_11,68,2815
+QLearner,maze_11,61,2852
+QLearner,maze_11,63,2853
+QLearner,maze_12,350,1021
+QLearner,maze_12,176,1049
+QLearner,maze_12,186,1017
+QLearner,maze_12,203,1023
+QLearner,maze_12,176,1064
+QLearner,maze_13,81,326
+QLearner,maze_13,114,300
+QLearner,maze_13,117,310
+QLearner,maze_13,316,392
+QLearner,maze_13,64,343
+ProgressiveQLearner - RandomForestModel,maze_1,133,279
+ProgressiveQLearner - RandomForestModel,maze_1,154,268
+ProgressiveQLearner - RandomForestModel,maze_1,201,279
+ProgressiveQLearner - RandomForestModel,maze_1,121,280
+ProgressiveQLearner - RandomForestModel,maze_1,115,277
+ProgressiveQLearner - RandomForestModel,maze_2,27,146
+ProgressiveQLearner - RandomForestModel,maze_2,31,253
+ProgressiveQLearner - RandomForestModel,maze_2,27,185
+ProgressiveQLearner - RandomForestModel,maze_3,547,146
+ProgressiveQLearner - RandomForestModel,maze_3,64,119
+ProgressiveQLearner - RandomForestModel,maze_3,56,132
+ProgressiveQLearner - RandomForestModel,maze_3,493,136
+ProgressiveQLearner - RandomForestModel,maze_5,71,560
+ProgressiveQLearner - RandomForestModel,maze_5,41,874
+ProgressiveQLearner - RandomForestModel,maze_5,546,974
+ProgressiveQLearner - RandomForestModel,maze_5,28,695
+ProgressiveQLearner - RandomForestModel,maze_6,88,1488
+ProgressiveQLearner - RandomForestModel,maze_7,272,298
+ProgressiveQLearner - RandomForestModel,maze_7,247,479
+ProgressiveQLearner - RandomForestModel,maze_7,137,299
+ProgressiveQLearner - RandomForestModel,maze_8,60,318
+ProgressiveQLearner - RandomForestModel,maze_9,69,749
+ProgressiveQLearner - RandomForestModel,maze_10,263,1468
+ProgressiveQLearner - RandomForestModel,maze_10,914,1020
+ProgressiveQLearner - RandomForestModel,maze_10,53,1230
+ProgressiveQLearner - RandomForestModel,maze_12,99,1770
+ProgressiveQLearner - RandomForestModel,maze_13,549,840
+ProgressiveQLearner - RandomForestModel,maze_13,99,831
+ProgressiveQLearner - RandomForestModel - Cumulative,maze_1,107,279
+ProgressiveQLearner - RandomForestModel - Cumulative,maze_1,159,268
+ProgressiveQLearner - RandomForestModel - Cumulative,maze_1,115,289
+ProgressiveQLearner - RandomForestModel - Cumulative,maze_1,101,291
+ProgressiveQLearner - RandomForestModel - Cumulative,maze_1,89,292
+ProgressiveQLearner - RandomForestModel - Cumulative,maze_2,29,218
+ProgressiveQLearner - RandomForestModel - Cumulative,maze_2,29,298
+ProgressiveQLearner - RandomForestModel - Cumulative,maze_2,29,87
+ProgressiveQLearner - RandomForestModel - Cumulative,maze_2,36,257
+ProgressiveQLearner - RandomForestModel - Cumulative,maze_2,29,185
+ProgressiveQLearner - RandomForestModel - Cumulative,maze_3,77,218
+ProgressiveQLearner - RandomForestModel - Cumulative,maze_3,110,82
+ProgressiveQLearner - RandomForestModel - Cumulative,maze_3,262,143
+ProgressiveQLearner - RandomForestModel - Cumulative,maze_5,44,1085
+ProgressiveQLearner - RandomForestModel - Cumulative,maze_6,458,1703
+ProgressiveQLearner - RandomForestModel - Cumulative,maze_6,659,1221
+ProgressiveQLearner - RandomForestModel - Cumulative,maze_7,208,258
+ProgressiveQLearner - RandomForestModel - Cumulative,maze_7,36,251
+ProgressiveQLearner - RandomForestModel - Cumulative,maze_7,58,431
+ProgressiveQLearner - RandomForestModel - Cumulative,maze_8,316,760
+ProgressiveQLearner - RandomForestModel - Cumulative,maze_9,72,331
+ProgressiveQLearner - RandomForestModel - Cumulative,maze_9,95,380
+ProgressiveQLearner - RandomForestModel - Cumulative,maze_9,78,326
+ProgressiveQLearner - RandomForestModel - Cumulative,maze_9,70,287
+ProgressiveQLearner - RandomForestModel - Cumulative,maze_9,70,316
+ProgressiveQLearner - RandomForestModel - Cumulative,maze_10,274,1539
+ProgressiveQLearner - RandomForestModel - Cumulative,maze_10,533,505
+ProgressiveQLearner - RandomForestModel - Cumulative,maze_10,115,446
+ProgressiveQLearner - RandomForestModel - Cumulative,maze_10,166,1415
+ProgressiveQLearner - RandomForestModel - Cumulative,maze_10,327,1168
+ProgressiveQLearner - RandomForestModel - Cumulative,maze_11,79,2419
+ProgressiveQLearner - RandomForestModel - Cumulative,maze_12,311,1203
+ProgressiveQLearner - RandomForestModel - Cumulative,maze_12,464,945
+ProgressiveQLearner - RandomForestModel - Cumulative,maze_12,292,607
+ProgressiveQLearner - RandomForestModel - Cumulative,maze_13,92,1537
+ProgressiveQLearner - RandomForestModel - Cumulative,maze_13,55,2808
+ProgressiveQLearner - RandomForestModel - Cumulative,maze_13,79,1667
