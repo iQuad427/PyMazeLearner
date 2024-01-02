@@ -119,6 +119,8 @@ class GenericView(BaseView):
         value_test = all(value_t)
         return value_test and instance_test
 
+    def names(self) -> tuple:
+        return None
 
 class Actions:
     STAY = 0

@@ -46,7 +46,9 @@ class Environment:
         self.possible_agents = [
             agent
             for agent in starting_pos.keys()
-            if agent != Objects.EXIT and agent != Objects.MINOTAUR and agent != Objects.AGENT
+            if agent != Objects.EXIT
+            and agent != Objects.MINOTAUR
+            and agent != Objects.AGENT
         ]
         self.agents = None
 
@@ -70,6 +72,8 @@ class Environment:
 
         self.render_fps = 4
 
+        self.cumulative_rewards = {agent: 0 for agent in self.possible_agents}
+
     def reset(self):
         self.agents = deepcopy(self.possible_agents)
         self.pos = deepcopy(self.starting_pos)
@@ -82,6 +86,7 @@ class Environment:
         infos[Objects.MINOTAUR] = self.pos[Objects.MINOTAUR].copy()
         self.previous_state = deepcopy(self.starting_pos)
         self.previous_actions = {agent: 0 for agent in self.starting_pos.keys()}
+        self.cumulative_rewards = {agent: 0 for agent in self.possible_agents}
 
         if self.render_mode == "human":
             self.render()
@@ -180,7 +185,7 @@ class Environment:
 
             if (
                 agent_action != 0
-                and _star(agent_position, self.transition_matrix)[agent_action-1]
+                and _star(agent_position, self.transition_matrix)[agent_action - 1]
                 == Objects.EMPTY
             ):
                 self.pos[agent] += self.moves[agent_action]
@@ -231,9 +236,12 @@ class Environment:
         infos = {agent: self.pos[agent] for agent in self.possible_agents}
         infos[Objects.MINOTAUR] = self.pos[Objects.MINOTAUR]
 
-
-        state_comparison = [infos[agent] == self.previous_state[agent] for agent in infos]
-        action_comparison = [actions[agent] == self.previous_actions[agent] for agent in actions]
+        state_comparison = [
+            infos[agent] == self.previous_state[agent] for agent in infos
+        ]
+        action_comparison = [
+            actions[agent] == self.previous_actions[agent] for agent in actions
+        ]
         if all(action_comparison) and all([all(i) for i in state_comparison]):
             for agent in self.agents:
                 terminations[agent] = True
@@ -246,6 +254,10 @@ class Environment:
         # Rendering
         if self.render_mode == "human":
             self.render()
+
+        # Add all rewards to cumulative rewards
+        for agent in self.possible_agents:
+            self.cumulative_rewards[agent] += rewards.get(agent, 0)
 
         return observations, rewards, terminations, truncations, infos
 
@@ -373,7 +385,11 @@ class Environment:
         self._draw_maze(self.surface)
 
         # Draw players
-        for agent in [agent for agent in self.pos if agent is not Objects.EXIT and agent is not Objects.AGENT]:
+        for agent in [
+            agent
+            for agent in self.pos
+            if agent is not Objects.EXIT and agent is not Objects.AGENT
+        ]:
             x, y = self.pos[agent]
 
             # Render player image

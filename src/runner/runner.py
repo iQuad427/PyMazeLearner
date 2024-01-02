@@ -10,7 +10,7 @@ from src.environments.models import Objects, BaseView
 from src.environments.observer.base import BaseObserver
 from src.environments.utils import grid_from_string, add_agents
 from src.learners.qlearner import QLearner
-from src.runner.event import Event, first_win
+from src.runner.event import Event, first_win, win
 
 
 class Runner:
@@ -22,7 +22,7 @@ class Runner:
         convergence_count=300,
         max_steps=1_000,
         sleep_time=None,
-        iterations=10_000,
+        iterations=20_000,
         render_mode=None,
         enable_observation: bool = True,
         train=True,
@@ -56,7 +56,7 @@ class Runner:
         self,
         convergence_count=None,
         iterations=None,
-            enable_observation=None,
+        enable_observation=None,
         max_steps=None,
         render_mode=None,
         train=None,
@@ -93,7 +93,9 @@ class Runner:
         )
 
     def run(self):
-        assert self.action_logger is None or self.enable_observation, "Cannot log actions without observation"
+        assert (
+            self.action_logger is None or self.enable_observation
+        ), "Cannot log actions without observation"
 
         for ep in tqdm(range(self.iterations), desc="Q-Learning"):
             if self.force_stop:
@@ -126,7 +128,6 @@ class Runner:
             # Take a step in the environment.
             observations, rewards, terminations, truncations, infos = env.step(actions)
 
-
             # Get the new states of all agents.
             new_states = self._get_states(infos)
 
@@ -140,8 +141,11 @@ class Runner:
                 for agent in self.agents:
                     if rewards[agent] == 1:
                         if not self.did_already_win:
-                            self.event_callback(self, first_win(ep, env.timestep))
+                            self.event_callback(self, first_win(ep, env.timestep, env.cumulative_rewards))
                             self.did_already_win = True
+                        else:
+                            self.event_callback(self, win(ep, env.timestep, env.cumulative_rewards))
+
                         self.step_to_win.append(env.timestep)
 
                         if len(self.step_to_win) >= self.convergence_count:

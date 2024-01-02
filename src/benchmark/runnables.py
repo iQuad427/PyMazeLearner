@@ -16,28 +16,29 @@ class BaseRunnable(metaclass=abc.ABCMeta):
 
 class RunnableQLearner(BaseRunnable):
     def __init__(self):
-        self.event = None
+        self.events = []
 
     def run(self, mazes, **kwargs):
         for maze in mazes:
             print("Running QLearner on maze {0}.".format(maze))
             try:
 
-                def log_first_win_and_stop(env, event):
-                    if event.name == "first_win":
-                        self.event = event
-                        env.force_stop = True
+                def log(env, event):
+                    self.events.append(event)
 
                 runner = Runner(
                     maze=mazes[maze],
                     agent_builder=lambda _, grid_shape: QLearner(grid_shape),
-                    event_callback=log_first_win_and_stop,
+                    event_callback=log,
+                    convergence_count=kwargs.get("convergence_count", 200),
                 )
 
                 runner.run()
 
-                yield maze, self.event
-                self.event = None
+                for event in self.events:
+                    yield maze, event
+
+                self.events.clear()
             except Exception as e:
                 print(
                     "An error occurred while running the QLearner on maze {0}.".format(
@@ -49,7 +50,7 @@ class RunnableQLearner(BaseRunnable):
 
 class RunnableProgressiveQLearner(BaseRunnable):
     def __init__(self):
-        self.event = None
+        self.events = []
 
     def run(
         self,
@@ -65,9 +66,8 @@ class RunnableProgressiveQLearner(BaseRunnable):
         for index, (name, maze) in enumerate(mazes.items()):
             try:
 
-                def log_first_win_and_stop(env, event):
-                    if event.name == "first_win":
-                        self.event = event
+                def log(env, event):
+                    self.events.append(event)
 
                 runner = Runner(
                     maze=maze,
@@ -78,7 +78,8 @@ class RunnableProgressiveQLearner(BaseRunnable):
                         predict=symbolic_learners[agent].predict if index > 0 else None,
                         bias=bias,
                     ),
-                    event_callback=log_first_win_and_stop,
+                    event_callback=log,
+                    convergence_count=kwargs.get("convergence_count", 200),
                 )
 
                 runner.run()
@@ -86,8 +87,9 @@ class RunnableProgressiveQLearner(BaseRunnable):
                 if not cumulative and not use_first_maze:
                     symbolic_learners.clear()
 
-                yield name, self.event
-                self.event = None
+                for event in self.events:
+                    yield maze, event
+                self.events.clear()
 
                 if not use_first_maze or index == 0:
                     runner.configure(
