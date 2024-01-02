@@ -65,7 +65,7 @@ class Environment:
         self.player_img = None
 
         self.CELL_SIZE = 40
-        self.WALL_COLOR = (32,178,170)
+        self.WALL_COLOR = (32, 178, 170)
         self.BG_COLOR = (255, 255, 255)
 
         self.render_fps = 4

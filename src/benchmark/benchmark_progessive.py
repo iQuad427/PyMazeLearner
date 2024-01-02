@@ -2,18 +2,21 @@ import math
 from collections import defaultdict
 
 from src.environments.envs.examples import (
-    maze_7,
     maze_1,
     maze_2,
+    maze_3,
     maze_4,
     maze_5,
     maze_6,
+    maze_7,
     maze_8,
     maze_9,
     maze_10,
     maze_11,
     maze_12,
-    maze_13, maze_3,
+    maze_13,
+    maze_14,
+    maze_15,
 )
 from src.java_interop_utils import safe_init_jvm, safe_stop_jvm
 from src.learners.progressive_qlearner import ProgressiveQLearner
@@ -21,13 +24,16 @@ from src.learners.qlearner import QLearner
 from src.learners.symbolic_learner.learner import SymbolicLearner
 # from src.learners.symbolic_learner.models.weka.naive_bayes import NaiveBayesWekaModel
 from src.learners.symbolic_learner.models.kNN import kNNModel
+from src.learners.symbolic_learner.models.random_forest import RandomForestModel
 from src.runner.runner import Runner
 
 if __name__ == "__main__":
     # Initialize the JVM for Weka.
     safe_init_jvm()
 
-    model = kNNModel
+    model = RandomForestModel
+
+    output = f"out_prog_random_forest.csv"
 
     mazes = {
         "maze_1": maze_1,
@@ -43,17 +49,19 @@ if __name__ == "__main__":
         "maze_11": maze_11,
         "maze_12": maze_12,
         "maze_13": maze_13,
+        "maze_14": maze_14,
+        "maze_15": maze_15,
     }
 
     # Write header to out.csv
-    with open("out_prog.csv", "w") as f:
-        f.write("maze,first_win_no_symbolic_learner,first_win_symbolic_learner,type\n")
+    with open(output, "w") as f:
+        f.write("maze,episodes,steps,type\n")
 
     symbolic_learners = defaultdict(lambda: SymbolicLearner(model))
 
     for index, (name, maze) in enumerate(mazes.items()):
         print(f"Running ProgressiveQLearner on maze {name}.")
-        print(dict(symbolic_learners))
+        # print(dict(symbolic_learners))
 
         class X:
             first_win_symbolic_learner = None
@@ -80,7 +88,7 @@ if __name__ == "__main__":
         runner.run()
 
         # Append data to out.csv
-        with open("out_prog.csv", "a") as f:
+        with open(output, "a") as f:
             if not x.first_win_symbolic_learner:
                 f.write(f"{name},0,0,progressive\n")
             else:
@@ -117,7 +125,7 @@ if __name__ == "__main__":
 
         no_symbolic_learner_runner.run()
 
-        with open("out_prog.csv", "a") as f:
+        with open(output, "a") as f:
             if not x.first_win_no_symbolic_learner:
                 f.write(f"{name},0,0,qlearner\n")
             else:
@@ -125,8 +133,9 @@ if __name__ == "__main__":
                     f'{name},{x.first_win_no_symbolic_learner.data.get("episodes")},{x.first_win_no_symbolic_learner.data.get("number_of_steps")},qlearner\n'
                 )
 
-        print(symbolic_learners)
+        # print(symbolic_learners)
         for agent in symbolic_learners:
             print("Training model for agent {0}.".format(agent))
             symbolic_learners[agent].train()
+
     safe_stop_jvm()

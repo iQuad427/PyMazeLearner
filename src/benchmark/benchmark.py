@@ -10,16 +10,17 @@ from src.benchmark.runnables import (
 from src.environments.envs.examples import (
     maze_1,
     maze_2,
+    maze_3,
     maze_4,
     maze_5,
     maze_6,
+    maze_7,
     maze_8,
     maze_9,
     maze_10,
     maze_11,
     maze_12,
     maze_13,
-    maze_3,
 )
 from src.java_interop_utils import safe_init_jvm, safe_stop_jvm
 from src.learners.symbolic_learner.models.naive_bayes import NaiveBayesModel
@@ -29,7 +30,7 @@ from src.learners.symbolic_learner.models.weka.naive_bayes import NaiveBayesWeka
 
 RUNNABLE_FACTORY = "runnable_factory"
 MODEL_FACTORY = "model_factory"
-CUMLATIVE = "cumulative"
+CUMULATIVE = "cumulative"
 
 
 def retrieve_number_of_steps_and_episodes_per_maze(
@@ -60,17 +61,19 @@ def run_benchmark(runnable_name, runnable_params, mazes, output_file, runs):
 
     for _ in range(runs):
         for maze, event in runnable().run(mazes, **params):
-            with open(output_file, "a") as f:
-                f.write(
-                    "{0},{1},{2},{3}\n".format(
-                        runnable_name,
-                        maze,
-                        event.data["number_of_steps"],
-                        event.data["episodes"],
+            if event:
+                with open(output_file, "a") as f:
+                    f.write(
+                        "{0},{1},{2},{3}\n".format(
+                            runnable_name,
+                            maze,
+                            event.data["number_of_steps"],
+                            event.data["episodes"],
+                        )
                     )
-                )
 
     safe_stop_jvm()
+
 
 def benchmark_runnables(
     mazes: Dict[str, str],
@@ -113,6 +116,7 @@ if __name__ == "__main__":
         "maze_4": maze_4,
         "maze_5": maze_5,
         "maze_6": maze_6,
+        "maze_7": maze_7,
         "maze_8": maze_8,
         "maze_9": maze_9,
         "maze_10": maze_10,
@@ -142,17 +146,17 @@ if __name__ == "__main__":
             "ProgressiveQLearner - C45Weka - Cumulative": {
                 RUNNABLE_FACTORY: RunnableProgressiveQLearner,
                 MODEL_FACTORY: C45WekaModel,
-                CUMLATIVE: True,
+                CUMULATIVE: True,
             },
             "ProgressiveQLearner - NaiveBayesWekaModel - Cumulative": {
                 RUNNABLE_FACTORY: RunnableProgressiveQLearner,
                 MODEL_FACTORY: NaiveBayesWekaModel,
-                CUMLATIVE: True,
+                CUMULATIVE: True,
             },
             "ProgressiveQLearner - NaiveBayesModel - Cumulative": {
                 RUNNABLE_FACTORY: RunnableProgressiveQLearner,
                 MODEL_FACTORY: NaiveBayesModel,
-                CUMLATIVE: True,
+                CUMULATIVE: True,
             },
         },
         runs=5,
