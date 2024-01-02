@@ -51,11 +51,20 @@ class RunnableProgressiveQLearner(BaseRunnable):
     def __init__(self):
         self.event = None
 
-    def run(self, mazes=None, model_factory=None, cumulative=False, **kwargs):
+    def run(
+        self,
+        mazes=None,
+        model_factory=None,
+        cumulative=False,
+        bias=-0.2,
+        use_first_maze=False,
+        **kwargs,
+    ):
         symbolic_learners = defaultdict(lambda: SymbolicLearner(model_factory))
 
         for index, (name, maze) in enumerate(mazes.items()):
             try:
+
                 def log_first_win_and_stop(env, event):
                     if event.name == "first_win":
                         self.event = event
@@ -67,35 +76,37 @@ class RunnableProgressiveQLearner(BaseRunnable):
                         grid_shape,
                         # We only want to use the symbolic model once it has been trained.
                         predict=symbolic_learners[agent].predict if index > 0 else None,
+                        bias=bias,
                     ),
                     event_callback=log_first_win_and_stop,
                 )
 
                 runner.run()
 
-                if not cumulative:
+                if not cumulative and not use_first_maze:
                     symbolic_learners.clear()
 
                 yield name, self.event
                 self.event = None
 
-                runner.configure(
-                    train=False,
-                    convergence_count=math.inf,
-                    iterations=1_000,
-                    enable_observation=True,
-                    action_logger=lambda agent, state, action: symbolic_learners[
-                        agent
-                    ].log(state, action),
-                )
+                if not use_first_maze or index == 0:
+                    runner.configure(
+                        train=False,
+                        convergence_count=math.inf,
+                        iterations=1_000,
+                        enable_observation=True,
+                        action_logger=lambda agent, state, action: symbolic_learners[
+                            agent
+                        ].log(state, action),
+                    )
 
-                runner.run()
+                    runner.run()
 
-                for agent in symbolic_learners:
-                    symbolic_learners[agent].train()
+                    for agent in symbolic_learners:
+                        symbolic_learners[agent].train()
 
             except Exception as e:
                 print(
-                   f"An error occurred while running the ProgressiveQLearner on maze {maze} for model {model_factory.__name__}."
+                    f"An error occurred while running the ProgressiveQLearner on maze {maze} for model {model_factory.__name__}."
                 )
                 print(e)
