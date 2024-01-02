@@ -144,20 +144,8 @@ class Runner:
                             self.did_already_win = True
                         self.step_to_win.append(env.timestep)
 
-                        if len(self.step_to_win) >= self.convergence_count * 2:
-                            # Check if the last 100 episodes have converged.
-                            if np.min(
-                                self.step_to_win[-self.convergence_count :]
-                            ) == np.min(
-                                self.step_to_win[
-                                    -self.convergence_count
-                                    * 2 : -self.convergence_count
-                                ]
-                            ):
-                                logging.warning(
-                                    f"[Just important] Converged after {ep} episodes"
-                                )
-                                return True
+                        if len(self.step_to_win) >= self.convergence_count:
+                            return True
                 break
 
         return False
