@@ -28,6 +28,7 @@ class GenericObserver(BaseObserver):
             )
         return observations
 
+
 generic_default = GenericObserver(
     [
         WallAgentObservation(),

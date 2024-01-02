@@ -89,7 +89,14 @@ class DefaultView(BaseView):
             and self.direction_exit == other.direction_exit
         )
 
+
 class GenericView(BaseView):
+    def names(self) -> tuple:
+        return tuple(
+            # TODO: This is a hack. We should not have to do this.
+            [f"obs_{i}" for i in range(len(self.observations))]
+        )
+
     def __init__(self, observations: List[List[int]]):
         self.observations = observations
 
@@ -112,6 +119,8 @@ class GenericView(BaseView):
         value_test = all(value_t)
         return value_test and instance_test
 
+    def names(self) -> tuple:
+        return None
 
 class Actions:
     STAY = 0
