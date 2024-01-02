@@ -22,11 +22,11 @@ if __name__ == "__main__":
     observer = GenericObserver(
         [
             WallAgentObservation(),
-            # WallMinoObservation(),
-            # DistMinoObservation(),
-            # DistExitObservation(),
-            # DirMinoObservation(),
-            # DirExitObservation()
+            WallMinoObservation(),
+            DistMinoObservation(),
+            DistExitObservation(),
+            DirMinoObservation(),
+            DirExitObservation()
         ]
     )
     model = RandomForestModel
@@ -34,7 +34,7 @@ if __name__ == "__main__":
     runner = Runner(
         enable_observation=False,
         # convergence_count=math.inf,
-        maze=maze_14,
+        maze=maze_7,
         agent_builder=lambda _, grid_shape: ProgressiveQLearner(grid_shape),
         n_agents=1,
         iterations=10_000,
@@ -63,7 +63,7 @@ if __name__ == "__main__":
         symbolic_learners[agent].train()
 
     progressive_runner = Runner(
-        maze=maze_14,
+        maze=maze_8,
         agent_builder=lambda agent, grid_shape: ProgressiveQLearner(
             grid_shape, predict=symbolic_learners[agent].predict
         ),

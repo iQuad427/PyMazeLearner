@@ -1,0 +1,305 @@
+model,maze,steps,episodes
+QLearner,maze_1,129,283
+QLearner,maze_2,85,138
+QLearner,maze_3,197,182
+ProgressiveQLearner - C45,maze_1,175,279
+ProgressiveQLearner - C45Weka,maze_1,122,291
+ProgressiveQLearner - C45 - Cumulative,maze_1,160,273
+ProgressiveQLearner - C45Weka - Cumulative,maze_1,285,284
+ProgressiveQLearner - NaiveBayesModel,maze_1,131,287
+ProgressiveQLearner - NaiveBayesModel - Cumulative,maze_1,141,271
+ProgressiveQLearner - NaiveBayesWekaModel,maze_1,115,273
+ProgressiveQLearner - NaiveBayesWekaModel - Cumulative,maze_1,119,285
+ProgressiveQLearner - C45Weka,maze_2,687,71
+ProgressiveQLearner - C45,maze_2,27,95
+ProgressiveQLearner - C45Weka - Cumulative,maze_2,30,94
+ProgressiveQLearner - NaiveBayesModel,maze_2,27,121
+ProgressiveQLearner - NaiveBayesWekaModel,maze_2,28,115
+ProgressiveQLearner - NaiveBayesWekaModel - Cumulative,maze_2,29,153
+ProgressiveQLearner - C45 - Cumulative,maze_2,27,237
+QLearner,maze_4,322,742
+QLearner,maze_5,33,573
+ProgressiveQLearner - NaiveBayesWekaModel - Cumulative,maze_3,112,170
+QLearner,maze_6,284,443
+QLearner,maze_7,116,245
+ProgressiveQLearner - NaiveBayesModel,maze_3,861,351
+QLearner,maze_8,182,463
+QLearner,maze_9,106,600
+QLearner,maze_10,96,929
+ProgressiveQLearner - NaiveBayesModel - Cumulative,maze_2,128,1168
+QLearner,maze_11,64,2857
+ProgressiveQLearner - C45Weka,maze_3,534,1940
+QLearner,maze_12,164,1035
+QLearner,maze_13,93,367
+QLearner,maze_1,121,277
+QLearner,maze_2,76,129
+QLearner,maze_3,163,158
+QLearner,maze_4,303,769
+QLearner,maze_5,29,546
+QLearner,maze_6,258,438
+QLearner,maze_7,139,252
+QLearner,maze_8,164,448
+QLearner,maze_9,242,594
+QLearner,maze_10,100,923
+QLearner,maze_11,93,2853
+QLearner,maze_12,233,1052
+QLearner,maze_13,80,245
+QLearner,maze_1,123,289
+QLearner,maze_2,68,134
+QLearner,maze_3,103,166
+QLearner,maze_4,846,785
+QLearner,maze_5,33,548
+QLearner,maze_6,181,440
+QLearner,maze_7,91,246
+QLearner,maze_8,122,453
+QLearner,maze_9,231,589
+QLearner,maze_10,35,922
+QLearner,maze_11,62,2850
+QLearner,maze_12,179,1063
+QLearner,maze_13,90,353
+QLearner,maze_1,99,282
+QLearner,maze_2,84,128
+QLearner,maze_3,148,167
+QLearner,maze_4,353,764
+QLearner,maze_5,32,598
+QLearner,maze_6,350,449
+QLearner,maze_7,132,248
+QLearner,maze_8,133,455
+QLearner,maze_9,188,617
+QLearner,maze_10,58,926
+QLearner,maze_11,61,2846
+QLearner,maze_12,228,1016
+QLearner,maze_13,125,337
+QLearner,maze_1,142,277
+QLearner,maze_2,68,130
+QLearner,maze_3,161,160
+QLearner,maze_4,455,779
+QLearner,maze_5,35,549
+QLearner,maze_6,149,446
+QLearner,maze_7,168,255
+ProgressiveQLearner - NaiveBayesWekaModel - Cumulative,maze_5,61,787
+QLearner,maze_8,277,457
+QLearner,maze_9,405,598
+QLearner,maze_10,108,928
+QLearner,maze_11,88,2846
+QLearner,maze_12,167,1048
+QLearner,maze_13,94,296
+ProgressiveQLearner - NaiveBayesModel - Cumulative,maze_4,161,2072
+ProgressiveQLearner - NaiveBayesModel - Cumulative,maze_5,97,4060
+ProgressiveQLearner - C45Weka,maze_6,194,969
+ProgressiveQLearner - C45Weka,maze_7,361,604
+ProgressiveQLearner - NaiveBayesWekaModel - Cumulative,maze_7,80,189
+ProgressiveQLearner - C45Weka,maze_9,70,671
+ProgressiveQLearner - C45,maze_6,61,696
+ProgressiveQLearner - C45,maze_7,360,337
+ProgressiveQLearner - C45Weka,maze_10,241,2207
+ProgressiveQLearner - C45,maze_9,83,407
+ProgressiveQLearner - C45,maze_10,601,902
+ProgressiveQLearner - NaiveBayesWekaModel,maze_7,155,306
+ProgressiveQLearner - NaiveBayesWekaModel,maze_8,109,273
+ProgressiveQLearner - NaiveBayesWekaModel,maze_9,95,1076
+ProgressiveQLearner - NaiveBayesModel,maze_8,67,475
+ProgressiveQLearner - NaiveBayesWekaModel,maze_10,590,435
+ProgressiveQLearner - NaiveBayesModel,maze_9,78,671
+ProgressiveQLearner - NaiveBayesWekaModel - Cumulative,maze_10,705,654
+ProgressiveQLearner - C45 - Cumulative,maze_7,982,387
+ProgressiveQLearner - C45Weka,maze_13,84,861
+ProgressiveQLearner - C45Weka,maze_1,191,288
+ProgressiveQLearner - C45Weka,maze_2,31,77
+ProgressiveQLearner - NaiveBayesModel - Cumulative,maze_9,70,376
+ProgressiveQLearner - NaiveBayesModel - Cumulative,maze_10,48,383
+ProgressiveQLearner - C45 - Cumulative,maze_9,83,841
+ProgressiveQLearner - NaiveBayesWekaModel - Cumulative,maze_13,44,1384
+ProgressiveQLearner - NaiveBayesWekaModel - Cumulative,maze_1,142,267
+ProgressiveQLearner - NaiveBayesWekaModel - Cumulative,maze_2,27,144
+ProgressiveQLearner - C45Weka - Cumulative,maze_9,105,835
+ProgressiveQLearner - C45Weka - Cumulative,maze_10,246,299
+ProgressiveQLearner - NaiveBayesModel - Cumulative,maze_13,765,907
+ProgressiveQLearner - NaiveBayesModel - Cumulative,maze_1,204,270
+ProgressiveQLearner - C45,maze_1,108,286
+ProgressiveQLearner - C45Weka - Cumulative,maze_12,284,1691
+ProgressiveQLearner - NaiveBayesWekaModel,maze_1,217,272
+ProgressiveQLearner - C45Weka - Cumulative,maze_13,292,1414
+ProgressiveQLearner - C45Weka - Cumulative,maze_1,106,276
+ProgressiveQLearner - C45Weka - Cumulative,maze_2,41,243
+ProgressiveQLearner - C45Weka - Cumulative,maze_3,85,336
+ProgressiveQLearner - C45Weka - Cumulative,maze_4,951,983
+ProgressiveQLearner - NaiveBayesModel,maze_13,163,1273
+ProgressiveQLearner - NaiveBayesModel,maze_1,116,265
+ProgressiveQLearner - NaiveBayesModel,maze_2,47,103
+ProgressiveQLearner - NaiveBayesModel,maze_3,368,241
+ProgressiveQLearner - NaiveBayesModel - Cumulative,maze_3,483,392
+ProgressiveQLearner - NaiveBayesWekaModel,maze_3,692,113
+ProgressiveQLearner - C45 - Cumulative,maze_13,186,1566
+ProgressiveQLearner - C45 - Cumulative,maze_1,120,261
+ProgressiveQLearner - C45 - Cumulative,maze_2,27,809
+ProgressiveQLearner - C45 - Cumulative,maze_3,77,399
+ProgressiveQLearner - C45Weka - Cumulative,maze_7,303,266
+ProgressiveQLearner - C45Weka,maze_7,431,412
+ProgressiveQLearner - C45Weka - Cumulative,maze_9,73,326
+ProgressiveQLearner - C45 - Cumulative,maze_5,227,800
+ProgressiveQLearner - NaiveBayesModel - Cumulative,maze_6,190,457
+ProgressiveQLearner - NaiveBayesWekaModel - Cumulative,maze_7,256,216
+ProgressiveQLearner - C45,maze_5,280,546
+ProgressiveQLearner - C45 - Cumulative,maze_7,372,341
+ProgressiveQLearner - NaiveBayesModel - Cumulative,maze_8,65,1605
+ProgressiveQLearner - NaiveBayesModel - Cumulative,maze_9,83,472
+ProgressiveQLearner - NaiveBayesWekaModel - Cumulative,maze_9,68,795
+ProgressiveQLearner - NaiveBayesWekaModel - Cumulative,maze_10,186,1015
+ProgressiveQLearner - NaiveBayesModel,maze_8,520,1148
+ProgressiveQLearner - C45Weka - Cumulative,maze_13,856,279
+ProgressiveQLearner - C45Weka - Cumulative,maze_1,97,286
+ProgressiveQLearner - C45Weka - Cumulative,maze_2,27,101
+ProgressiveQLearner - NaiveBayesWekaModel,maze_8,61,1158
+ProgressiveQLearner - NaiveBayesWekaModel,maze_9,79,2023
+ProgressiveQLearner - NaiveBayesWekaModel,maze_10,136,1040
+ProgressiveQLearner - NaiveBayesWekaModel - Cumulative,maze_13,27,955
+ProgressiveQLearner - NaiveBayesWekaModel - Cumulative,maze_1,138,285
+ProgressiveQLearner - NaiveBayesWekaModel - Cumulative,maze_2,38,155
+ProgressiveQLearner - NaiveBayesWekaModel,maze_12,650,1638
+ProgressiveQLearner - NaiveBayesWekaModel,maze_13,606,1499
+ProgressiveQLearner - NaiveBayesWekaModel,maze_1,130,284
+ProgressiveQLearner - NaiveBayesWekaModel,maze_2,29,310
+ProgressiveQLearner - NaiveBayesModel - Cumulative,maze_13,26,877
+ProgressiveQLearner - NaiveBayesModel - Cumulative,maze_1,146,291
+ProgressiveQLearner - NaiveBayesModel - Cumulative,maze_2,27,95
+ProgressiveQLearner - NaiveBayesWekaModel - Cumulative,maze_4,745,1549
+ProgressiveQLearner - NaiveBayesModel,maze_12,806,1531
+ProgressiveQLearner - C45,maze_10,214,1175
+ProgressiveQLearner - C45Weka,maze_1,103,281
+ProgressiveQLearner - C45Weka,maze_2,220,305
+ProgressiveQLearner - NaiveBayesModel,maze_13,356,1397
+ProgressiveQLearner - NaiveBayesModel,maze_1,299,275
+ProgressiveQLearner - NaiveBayesModel,maze_2,43,97
+ProgressiveQLearner - NaiveBayesModel,maze_3,98,268
+ProgressiveQLearner - NaiveBayesModel,maze_4,320,1080
+ProgressiveQLearner - NaiveBayesModel - Cumulative,maze_4,275,841
+ProgressiveQLearner - C45 - Cumulative,maze_13,26,709
+ProgressiveQLearner - C45 - Cumulative,maze_1,133,289
+ProgressiveQLearner - C45 - Cumulative,maze_2,36,165
+ProgressiveQLearner - C45,maze_13,39,1271
+ProgressiveQLearner - C45,maze_1,131,280
+ProgressiveQLearner - C45,maze_2,31,420
+ProgressiveQLearner - NaiveBayesModel,maze_7,208,329
+ProgressiveQLearner - C45Weka,maze_5,179,1396
+ProgressiveQLearner - NaiveBayesWekaModel - Cumulative,maze_8,115,746
+ProgressiveQLearner - NaiveBayesWekaModel - Cumulative,maze_9,70,675
+ProgressiveQLearner - NaiveBayesWekaModel - Cumulative,maze_10,76,1263
+ProgressiveQLearner - NaiveBayesWekaModel,maze_7,534,259
+ProgressiveQLearner - NaiveBayesWekaModel,maze_8,580,467
+ProgressiveQLearner - NaiveBayesModel,maze_9,133,483
+ProgressiveQLearner - NaiveBayesModel,maze_10,490,672
+ProgressiveQLearner - C45Weka - Cumulative,maze_9,77,1068
+ProgressiveQLearner - C45Weka - Cumulative,maze_10,420,571
+ProgressiveQLearner - C45Weka,maze_7,348,316
+ProgressiveQLearner - NaiveBayesModel,maze_12,87,1671
+ProgressiveQLearner - NaiveBayesModel,maze_13,303,905
+ProgressiveQLearner - NaiveBayesModel,maze_1,110,282
+ProgressiveQLearner - NaiveBayesModel - Cumulative,maze_9,75,799
+ProgressiveQLearner - NaiveBayesModel - Cumulative,maze_10,237,615
+ProgressiveQLearner - NaiveBayesWekaModel,maze_10,558,296
+ProgressiveQLearner - C45Weka - Cumulative,maze_12,291,2678
+ProgressiveQLearner - C45Weka - Cumulative,maze_13,73,894
+ProgressiveQLearner - C45Weka - Cumulative,maze_1,128,272
+ProgressiveQLearner - C45Weka - Cumulative,maze_2,315,179
+ProgressiveQLearner - NaiveBayesWekaModel - Cumulative,maze_13,64,1024
+ProgressiveQLearner - NaiveBayesWekaModel - Cumulative,maze_1,115,269
+ProgressiveQLearner - NaiveBayesWekaModel - Cumulative,maze_2,63,142
+ProgressiveQLearner - C45 - Cumulative,maze_7,249,308
+ProgressiveQLearner - NaiveBayesModel,maze_3,99,620
+ProgressiveQLearner - NaiveBayesModel,maze_4,537,931
+ProgressiveQLearner - NaiveBayesModel,maze_6,374,1949
+ProgressiveQLearner - C45Weka - Cumulative,maze_4,172,1449
+ProgressiveQLearner - NaiveBayesModel - Cumulative,maze_13,667,728
+ProgressiveQLearner - C45 - Cumulative,maze_9,65,554
+ProgressiveQLearner - NaiveBayesModel - Cumulative,maze_1,185,281
+ProgressiveQLearner - NaiveBayesModel - Cumulative,maze_2,27,221
+ProgressiveQLearner - C45,maze_7,465,207
+ProgressiveQLearner - NaiveBayesWekaModel - Cumulative,maze_4,354,2024
+ProgressiveQLearner - C45 - Cumulative,maze_10,188,3397
+ProgressiveQLearner - C45,maze_9,87,353
+ProgressiveQLearner - NaiveBayesWekaModel,maze_1,122,293
+ProgressiveQLearner - NaiveBayesWekaModel,maze_2,28,121
+ProgressiveQLearner - NaiveBayesModel - Cumulative,maze_4,241,1980
+ProgressiveQLearner - C45Weka,maze_12,133,924
+ProgressiveQLearner - NaiveBayesModel,maze_9,70,383
+ProgressiveQLearner - NaiveBayesModel,maze_10,443,852
+ProgressiveQLearner - C45 - Cumulative,maze_13,987,707
+ProgressiveQLearner - C45 - Cumulative,maze_1,143,275
+ProgressiveQLearner - C45 - Cumulative,maze_2,29,1279
+ProgressiveQLearner - C45 - Cumulative,maze_3,588,470
+ProgressiveQLearner - C45Weka,maze_1,179,284
+ProgressiveQLearner - C45,maze_12,88,901
+ProgressiveQLearner - C45Weka,maze_2,729,154
+ProgressiveQLearner - C45Weka,maze_3,263,630
+ProgressiveQLearner - C45Weka - Cumulative,maze_9,83,474
+ProgressiveQLearner - C45Weka - Cumulative,maze_10,699,955
+ProgressiveQLearner - NaiveBayesModel,maze_13,51,643
+ProgressiveQLearner - NaiveBayesModel,maze_1,142,287
+ProgressiveQLearner - C45,maze_1,132,286
+ProgressiveQLearner - C45,maze_2,43,242
+ProgressiveQLearner - NaiveBayesWekaModel - Cumulative,maze_9,74,792
+ProgressiveQLearner - NaiveBayesWekaModel - Cumulative,maze_10,96,623
+ProgressiveQLearner - NaiveBayesWekaModel,maze_6,273,795
+ProgressiveQLearner - NaiveBayesWekaModel,maze_7,607,412
+ProgressiveQLearner - C45 - Cumulative,maze_6,239,747
+ProgressiveQLearner - C45 - Cumulative,maze_7,405,305
+ProgressiveQLearner - NaiveBayesWekaModel,maze_9,79,1058
+ProgressiveQLearner - NaiveBayesModel,maze_3,578,2312
+ProgressiveQLearner - NaiveBayesWekaModel,maze_10,579,521
+ProgressiveQLearner - NaiveBayesModel,maze_4,538,974
+ProgressiveQLearner - C45 - Cumulative,maze_9,78,593
+ProgressiveQLearner - NaiveBayesModel - Cumulative,maze_9,75,797
+ProgressiveQLearner - C45 - Cumulative,maze_10,755,785
+ProgressiveQLearner - NaiveBayesModel - Cumulative,maze_10,421,796
+ProgressiveQLearner - C45Weka,maze_7,84,537
+ProgressiveQLearner - C45Weka,maze_8,55,1269
+ProgressiveQLearner - C45 - Cumulative,maze_12,282,1971
+ProgressiveQLearner - C45Weka - Cumulative,maze_1,123,276
+ProgressiveQLearner - C45 - Cumulative,maze_13,866,785
+ProgressiveQLearner - C45Weka - Cumulative,maze_2,29,251
+ProgressiveQLearner - C45 - Cumulative,maze_1,118,276
+ProgressiveQLearner - C45 - Cumulative,maze_2,35,171
+ProgressiveQLearner - C45Weka - Cumulative,maze_3,557,1798
+ProgressiveQLearner - NaiveBayesWekaModel - Cumulative,maze_1,186,287
+ProgressiveQLearner - NaiveBayesWekaModel - Cumulative,maze_2,174,129
+ProgressiveQLearner - NaiveBayesWekaModel - Cumulative,maze_3,718,146
+ProgressiveQLearner - NaiveBayesWekaModel,maze_13,144,1435
+ProgressiveQLearner - NaiveBayesWekaModel,maze_1,258,272
+ProgressiveQLearner - NaiveBayesWekaModel,maze_2,27,160
+ProgressiveQLearner - NaiveBayesWekaModel,maze_3,854,280
+ProgressiveQLearner - NaiveBayesWekaModel - Cumulative,maze_4,263,1348
+ProgressiveQLearner - C45,maze_6,87,1546
+ProgressiveQLearner - C45Weka,maze_10,525,721
+ProgressiveQLearner - NaiveBayesModel,maze_7,646,349
+ProgressiveQLearner - C45 - Cumulative,maze_4,254,775
+ProgressiveQLearner - C45 - Cumulative,maze_5,681,1115
+ProgressiveQLearner - NaiveBayesWekaModel,maze_5,28,464
+ProgressiveQLearner - NaiveBayesModel - Cumulative,maze_1,270,280
+ProgressiveQLearner - C45,maze_8,111,744
+ProgressiveQLearner - C45,maze_9,72,1128
+ProgressiveQLearner - C45,maze_10,251,998
+ProgressiveQLearner - NaiveBayesModel - Cumulative,maze_3,148,353
+ProgressiveQLearner - C45Weka - Cumulative,maze_7,487,444
+ProgressiveQLearner - C45Weka,maze_1,127,257
+ProgressiveQLearner - C45Weka,maze_2,27,115
+ProgressiveQLearner - C45Weka,maze_3,931,311
+ProgressiveQLearner - NaiveBayesWekaModel - Cumulative,maze_8,56,704
+ProgressiveQLearner - NaiveBayesWekaModel - Cumulative,maze_9,97,414
+ProgressiveQLearner - NaiveBayesWekaModel - Cumulative,maze_10,535,799
+ProgressiveQLearner - C45Weka - Cumulative,maze_9,70,807
+ProgressiveQLearner - C45Weka - Cumulative,maze_10,557,586
+ProgressiveQLearner - C45,maze_1,137,285
+ProgressiveQLearner - C45,maze_2,41,240
+ProgressiveQLearner - NaiveBayesModel - Cumulative,maze_7,174,572
+ProgressiveQLearner - C45 - Cumulative,maze_10,53,504
+ProgressiveQLearner - NaiveBayesModel,maze_13,26,1053
+ProgressiveQLearner - NaiveBayesWekaModel,maze_10,445,317
+ProgressiveQLearner - C45Weka,maze_7,130,357
+ProgressiveQLearner - C45Weka,maze_9,69,624
+ProgressiveQLearner - C45 - Cumulative,maze_13,946,925
+ProgressiveQLearner - C45Weka,maze_10,212,875
+ProgressiveQLearner - NaiveBayesModel - Cumulative,maze_10,192,1205
+ProgressiveQLearner - NaiveBayesWekaModel,maze_13,112,349
+ProgressiveQLearner - C45,maze_9,66,628
+ProgressiveQLearner - C45,maze_10,121,855

@@ -172,7 +172,7 @@ class Environment:
         - 3 : left
         - 4 : delay
 
-        MOVES: list = [[-1, 0], [0, 1], [1, 0], [0, -1], [0, 0]]
+        MOVES: list = [[0, 0], [-1, 0], [0, 1], [1, 0], [0, -1]]
 
         :param actions: dictionary of actions to take for each agent
         :return:
