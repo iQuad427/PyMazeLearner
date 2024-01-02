@@ -8,6 +8,7 @@ from src.learners.symbolic_learner.learner import SymbolicLearner
 from src.runner.runner import Runner
 
 
+
 class BaseRunnable(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def run(self, mazes, **kwargs):
@@ -88,14 +89,14 @@ class RunnableProgressiveQLearner(BaseRunnable):
                     symbolic_learners.clear()
 
                 for event in self.events:
-                    yield maze, event
+                    yield name, event
                 self.events.clear()
 
                 if not use_first_maze or index == 0:
                     runner.configure(
                         train=False,
-                        convergence_count=math.inf,
-                        iterations=1_000,
+                        convergence_count=1_000,
+                        iterations=10_000,
                         enable_observation=True,
                         action_logger=lambda agent, state, action: symbolic_learners[
                             agent
