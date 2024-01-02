@@ -1,11 +1,12 @@
+import json
 import multiprocessing
-from collections import defaultdict
-from typing import Dict, Callable
+import os
+import uuid
+from datetime import datetime
+from typing import Dict
 
 from src.benchmark.runnables import (
-    BaseRunnable,
     RunnableQLearner,
-    RunnableProgressiveQLearner,
 )
 from src.environments.envs.examples import (
     maze_1,
@@ -21,56 +22,65 @@ from src.environments.envs.examples import (
     maze_11,
     maze_12,
     maze_13,
+    maze_14,
+    maze_15,
 )
 from src.java_interop_utils import safe_init_jvm, safe_stop_jvm
-from src.learners.symbolic_learner.models.naive_bayes import NaiveBayesModel
-from src.learners.symbolic_learner.models.random_forest import RandomForestModel
-from src.learners.symbolic_learner.models.weka.c45 import C45WekaModel
-from src.learners.symbolic_learner.models.weka.naive_bayes import NaiveBayesWekaModel
 
 RUNNABLE_FACTORY = "runnable_factory"
 MODEL_FACTORY = "model_factory"
 CUMULATIVE = "cumulative"
+CONVERGENCE_COUNT = "convergence_count"
 
 
-def retrieve_number_of_steps_and_episodes_per_maze(
-    mazes: Dict[str, str],
-    runnable_factory: Callable[[], BaseRunnable],
-    runs=5,
-    runnable_kwargs=None,
-) -> (Dict[str, list], Dict[str, list]):
-    number_of_steps = defaultdict(list)
-    number_of_episodes = defaultdict(list)
-
-    for _ in range(runs):
-        events = runnable_factory().run(mazes, **(runnable_kwargs or {}))
-
-        for maze, event in events.items():
-            number_of_steps[maze].append(event.data["number_of_steps"])
-            number_of_episodes[maze].append(event.data["episodes"])
-
-    return number_of_steps, number_of_episodes
+class CustomEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, type):
+            return obj.__name__
+        return json.JSONEncoder.default(self, obj)
 
 
 def run_benchmark(runnable_name, runnable_params, mazes, output_file, runs):
     safe_init_jvm()
 
-    print("Running {0}.".format(runnable_name))
     runnable = runnable_params.pop(RUNNABLE_FACTORY)
     params = runnable_params
 
     for _ in range(runs):
+        instance = str(uuid.uuid4())
+        win = 0
+        previous_maze = None
+
         for maze, event in runnable().run(mazes, **params):
+            if previous_maze != maze:
+                print(f"{runnable_name} - {instance} - {maze}")
+                instance = str(uuid.uuid4())
+                win = 0
+                previous_maze = maze
+
             if event:
+                win += 1
+
                 with open(output_file, "a") as f:
-                    f.write(
-                        "{0},{1},{2},{3}\n".format(
-                            runnable_name,
-                            maze,
-                            event.data["number_of_steps"],
-                            event.data["episodes"],
-                        )
-                    )
+                    values = [
+                        instance,
+                        runnable.__name__,
+                        runnable_params.get(MODEL_FACTORY).__name__
+                        if runnable_params.get(MODEL_FACTORY)
+                        else None,
+                        runnable_params.get(CUMULATIVE, False),
+                        runnable_params.get("bias", -0.2),
+                        runnable_params.get("use_first_maze", False),
+                        maze,
+                        win,
+                        event.data["number_of_steps"],
+                        event.data["episodes"],
+                        event.name == "first_win",
+                        runnable_params.get(CONVERGENCE_COUNT, 200),
+                        event.data["cumulative"],
+                    ]
+
+                    f.write(",".join(map(str, values)) + "\n")
 
     safe_stop_jvm()
 
@@ -79,11 +89,48 @@ def benchmark_runnables(
     mazes: Dict[str, str],
     runnables: Dict[str, Dict],
     runs=5,
-    output_file=None,
 ):
-    output_file = output_file or "out.csv"
+    # Create the output directory if it does not exist.
+    os.makedirs("out", exist_ok=True)
+
+    name = f"benchmark_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
+    output_file = os.path.join("out", f"{name}.csv")
+    output_file_config = os.path.join("out", f"{name}_config.csv")
+
+    with open(output_file_config, "w") as f:
+        f.write(
+            json.dumps(
+                {
+                    "mazes": list(mazes.keys()),
+                    "runnables": runnables,
+                    "runs": runs,
+                },
+                indent=4,
+                cls=CustomEncoder,
+            )
+        )
+
     with open(output_file, "w") as f:
-        f.write("model,maze,steps,episodes\n")
+        f.write(
+            ",".join(
+                [
+                    "instance",
+                    "runnable",
+                    "model",
+                    "cumulative",
+                    "bias",
+                    "use_first_maze",
+                    "maze",
+                    "win",
+                    "steps",
+                    "episodes",
+                    "first_win",
+                    "convergence_count",
+                    "cumulative_reward",
+                ]
+            )
+            + "\n"
+        )
 
     processes = []
 
@@ -108,7 +155,6 @@ def benchmark_runnables(
 
 
 if __name__ == "__main__":
-
     _mazes = {
         "maze_1": maze_1,
         "maze_2": maze_2,
@@ -123,6 +169,8 @@ if __name__ == "__main__":
         "maze_11": maze_11,
         "maze_12": maze_12,
         "maze_13": maze_13,
+        "maze_14": maze_14,
+        "maze_15": maze_15,
     }
 
     benchmark_runnables(
@@ -130,36 +178,8 @@ if __name__ == "__main__":
         {
             "QLearner": {
                 RUNNABLE_FACTORY: RunnableQLearner,
-            },
-            "ProgressiveQLearner - C45Weka": {
-                RUNNABLE_FACTORY: RunnableProgressiveQLearner,
-                MODEL_FACTORY: C45WekaModel,
-            },
-            "ProgressiveQLearner - NaiveBayesWekaModel": {
-                RUNNABLE_FACTORY: RunnableProgressiveQLearner,
-                MODEL_FACTORY: NaiveBayesWekaModel,
-            },
-            "ProgressiveQLearner - RandomForestModel": {
-                RUNNABLE_FACTORY: RunnableProgressiveQLearner,
-                MODEL_FACTORY: RandomForestModel,
-            },
-            "ProgressiveQLearner - C45Weka - Cumulative": {
-                RUNNABLE_FACTORY: RunnableProgressiveQLearner,
-                MODEL_FACTORY: C45WekaModel,
-                CUMULATIVE: True,
-            },
-            "ProgressiveQLearner - NaiveBayesWekaModel - Cumulative": {
-                RUNNABLE_FACTORY: RunnableProgressiveQLearner,
-                MODEL_FACTORY: NaiveBayesWekaModel,
-                CUMULATIVE: True,
-            },
-            "ProgressiveQLearner - NaiveBayesModel - Cumulative": {
-                RUNNABLE_FACTORY: RunnableProgressiveQLearner,
-                MODEL_FACTORY: NaiveBayesModel,
-                CUMULATIVE: True,
+                CONVERGENCE_COUNT: 4_000,
             },
         },
         runs=5,
     )
-
-
