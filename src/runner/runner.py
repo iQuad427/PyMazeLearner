@@ -55,7 +55,6 @@ class Runner:
     def configure(
         self,
         convergence_count=None,
-            event_callback=None,
         iterations=None,
         enable_observation=None,
         max_steps=None,
@@ -64,8 +63,6 @@ class Runner:
         sleep_time=None,
         action_logger=None,
     ):
-        if event_callback is not None:
-            self.event_callback = event_callback
         if enable_observation is not None:
             self.enable_observation = enable_observation
         if convergence_count is not None:
@@ -96,6 +93,8 @@ class Runner:
         )
 
     def run(self):
+        """ Returns: True in case of convergence on a solution, False otherwise """
+
         self.did_already_win = False
         self.force_stop = False
         self.step_to_win = []

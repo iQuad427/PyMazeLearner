@@ -129,5 +129,12 @@ class Actions:
     DOWN = 3
     LEFT = 4
 
+    def names(self) -> tuple:
+        """
+        Placeholder
+        TODO: Find a clever way to do it
+        """
+        pass
+
 
 ACTIONS = [Actions.STAY, Actions.UP, Actions.RIGHT, Actions.DOWN, Actions.LEFT]
