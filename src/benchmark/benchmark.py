@@ -39,8 +39,6 @@ CONVERGENCE_COUNT = "convergence_count"
 BIAS = "bias"
 USE_FIRST_MAZE = "use_first_maze"
 
-# Create locket to prevent concurrent access to the output file
-lock = multiprocessing.Lock()
 
 
 class CustomEncoder(json.JSONEncoder):
@@ -50,80 +48,14 @@ class CustomEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
-def run_benchmark(runnable_params, mazes, output_file, runs):
+def run_benchmark(runnable_params, mazes, runs, output_dir):
     safe_init_jvm()
 
-    runnable = runnable_params.pop(RUNNABLE_FACTORY)
-    params = runnable_params
-
-    for _ in range(runs):
-        instance = str(uuid.uuid4())
-        win = 0
-        previous_maze = None
-
-        for maze, event in runnable().run(mazes, **params):
-            if previous_maze != maze:
-                instance = str(uuid.uuid4())
-                win = 0
-                previous_maze = maze
-
-            if event:
-                win += 1
-
-                lock.acquire()
-
-                with open(output_file, "a") as f:
-                    values = [
-                        instance,
-                        runnable.__name__,
-                        runnable_params.get(MODEL_FACTORY).__name__
-                        if runnable_params.get(MODEL_FACTORY)
-                        else None,
-                        runnable_params.get(CUMULATIVE, False),
-                        runnable_params.get("bias", -0.2),
-                        runnable_params.get("use_first_maze", False),
-                        maze,
-                        win,
-                        event.data["number_of_steps"],
-                        event.data["episodes"],
-                        event.name == "first_win",
-                        runnable_params.get(CONVERGENCE_COUNT, 200),
-                        event.data["cumulative"],
-                    ]
-
-                    # Acquire the lock to prevent concurrent access to the output file
-                    f.write(",".join(map(str, values)) + "\n")
-                    # Release the lock
-
-                lock.release()
-
-    safe_stop_jvm()
-
-
-def benchmark_runnables(
-    mazes: Dict[str, str],
-    runnables: List[Dict],
-    runs=5,
-):
     # Create the output directory if it does not exist.
-    os.makedirs("out", exist_ok=True)
+    os.makedirs(output_dir, exist_ok=True)
 
-    name = f"benchmark_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
-    output_file = os.path.join("out", f"{name}.csv")
-    output_file_config = os.path.join("out", f"{name}_config.csv")
-
-    with open(output_file_config, "w") as f:
-        f.write(
-            json.dumps(
-                {
-                    "mazes": list(mazes.keys()),
-                    "runnables": runnables,
-                    "runs": runs,
-                },
-                indent=4,
-                cls=CustomEncoder,
-            )
-        )
+    filename = f"{runnable_params.get(RUNNABLE_FACTORY).__name__}_{runnable_params.get(MODEL_FACTORY).__name__ if runnable_params.get(MODEL_FACTORY) else None}_{runnable_params.get(CUMULATIVE, False)}_{runnable_params.get(CONVERGENCE_COUNT, 200)}_{runnable_params.get(BIAS, -0.2)}_{runnable_params.get(USE_FIRST_MAZE, False)}.csv"
+    output_file = os.path.join(output_dir, filename)
 
     with open(output_file, "w") as f:
         f.write(
@@ -147,7 +79,58 @@ def benchmark_runnables(
             + "\n"
         )
 
+    runnable = runnable_params.pop(RUNNABLE_FACTORY)
+    params = runnable_params
+
+    for _ in range(runs):
+        instance = str(uuid.uuid4())
+        win = 0
+        previous_maze = None
+
+        for maze, event in runnable().run(mazes, **params):
+            if previous_maze != maze:
+                instance = str(uuid.uuid4())
+                win = 0
+                previous_maze = maze
+
+            if event:
+                win += 1
+
+                with open(output_file, "a") as f:
+                    values = [
+                        instance,
+                        runnable.__name__,
+                        runnable_params.get(MODEL_FACTORY).__name__
+                        if runnable_params.get(MODEL_FACTORY)
+                        else None,
+                        runnable_params.get(CUMULATIVE, False),
+                        runnable_params.get("bias", -0.2),
+                        runnable_params.get("use_first_maze", False),
+                        maze,
+                        win,
+                        event.data["number_of_steps"],
+                        event.data["episodes"],
+                        event.name == "first_win",
+                        runnable_params.get(CONVERGENCE_COUNT, 200),
+                        event.data["cumulative"],
+                    ]
+
+                    f.write(",".join(map(str, values)) + "\n")
+
+    safe_stop_jvm()
+
+
+def benchmark_runnables(
+    mazes: Dict[str, str],
+    runnables: List[Dict],
+    runs=5,
+):
+    # Create the output directory if it does not exist.
+    os.makedirs("out", exist_ok=True)
+
     processes = []
+
+    output_dir = os.path.join("out", f"benchmark_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}", )
 
     for runnable_params in runnables:
         # Create a new process for each runnable
@@ -156,8 +139,8 @@ def benchmark_runnables(
             args=(
                 runnable_params,
                 mazes,
-                output_file,
                 runs,
+                output_dir,
             ),
         )
         processes.append(p)
@@ -199,7 +182,7 @@ if __name__ == "__main__":
         }
     ]
 
-    for bias in [-0.2, 0]:
+    for bias in [-0.2]:
         for cumulative in [True, False]:
             for convergence_count in [1_000]:
                 for model in [
@@ -223,5 +206,5 @@ if __name__ == "__main__":
     benchmark_runnables(
         _mazes,
         configs,
-        runs=10,
+        runs=5,
     )

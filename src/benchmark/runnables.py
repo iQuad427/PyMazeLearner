@@ -62,6 +62,7 @@ class RunnableProgressiveQLearner(BaseRunnable):
         use_first_maze=False,
         **kwargs,
     ):
+        print("Running ProgressiveQLearner on mazes with model {0}.".format(model_factory.__name__ if model_factory else None))
         symbolic_learners = defaultdict(lambda: SymbolicLearner(model_factory))
 
         for index, (name, maze) in enumerate(mazes.items()):
@@ -94,9 +95,10 @@ class RunnableProgressiveQLearner(BaseRunnable):
 
                 if not use_first_maze or index == 0:
                     runner.configure(
+                        event_callback=lambda runner, event: None,
                         train=False,
                         convergence_count=1_000,
-                        iterations=10_000,
+                        iterations=3_000,
                         enable_observation=True,
                         action_logger=lambda agent, state, action: symbolic_learners[
                             agent
