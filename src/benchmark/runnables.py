@@ -2,6 +2,7 @@ import abc
 import math
 from collections import defaultdict
 
+from src.environments import observer
 from src.learners.progressive_qlearner import ProgressiveQLearner
 from src.learners.qlearner import QLearner
 from src.learners.symbolic_learner.learner import SymbolicLearner
@@ -60,6 +61,7 @@ class RunnableProgressiveQLearner(BaseRunnable):
         cumulative=False,
         bias=-0.2,
         use_first_maze=False,
+        observer=None,
         **kwargs,
     ):
         symbolic_learners = defaultdict(lambda: SymbolicLearner(model_factory))
@@ -80,6 +82,7 @@ class RunnableProgressiveQLearner(BaseRunnable):
                         bias=bias,
                     ),
                     event_callback=log,
+                    observer=observer if observer is not None else None,
                     convergence_count=kwargs.get("convergence_count", 200),
                 )
 

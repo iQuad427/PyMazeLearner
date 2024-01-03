@@ -82,6 +82,9 @@ def run_benchmark(runnable_params, mazes, output_file, runs):
                         runnable_params.get(CUMULATIVE, False),
                         runnable_params.get("bias", -0.2),
                         runnable_params.get("use_first_maze", False),
+                        runnable_params.get("observer").serialize()
+                        if runnable_params.get("observer")
+                        else None,
                         maze,
                         win,
                         event.data["number_of_steps"],
