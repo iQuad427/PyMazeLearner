@@ -3,10 +3,11 @@ import multiprocessing
 import os
 import uuid
 from datetime import datetime
-from typing import Dict
+from typing import Dict, List
 
 from src.benchmark.runnables import (
     RunnableQLearner,
+    RunnableProgressiveQLearner,
 )
 from src.environments.envs.examples import (
     maze_1,
@@ -26,11 +27,20 @@ from src.environments.envs.examples import (
     maze_15,
 )
 from src.java_interop_utils import safe_init_jvm, safe_stop_jvm
+from src.learners.symbolic_learner.models.manual import ManualModel
+from src.learners.symbolic_learner.models.weka.c45 import C45WekaModel
+from src.learners.symbolic_learner.models.weka.naive_bayes import NaiveBayesWekaModel
+from src.learners.symbolic_learner.models.weka.part_dt import PDTWekaModel
 
 RUNNABLE_FACTORY = "runnable_factory"
 MODEL_FACTORY = "model_factory"
 CUMULATIVE = "cumulative"
 CONVERGENCE_COUNT = "convergence_count"
+BIAS = "bias"
+USE_FIRST_MAZE = "use_first_maze"
+
+# Create locket to prevent concurrent access to the output file
+lock = multiprocessing.Lock()
 
 
 class CustomEncoder(json.JSONEncoder):
@@ -40,7 +50,7 @@ class CustomEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
-def run_benchmark(runnable_name, runnable_params, mazes, output_file, runs):
+def run_benchmark(runnable_params, mazes, output_file, runs):
     safe_init_jvm()
 
     runnable = runnable_params.pop(RUNNABLE_FACTORY)
@@ -53,13 +63,14 @@ def run_benchmark(runnable_name, runnable_params, mazes, output_file, runs):
 
         for maze, event in runnable().run(mazes, **params):
             if previous_maze != maze:
-                print(f"{runnable_name} - {instance} - {maze}")
                 instance = str(uuid.uuid4())
                 win = 0
                 previous_maze = maze
 
             if event:
                 win += 1
+
+                lock.acquire()
 
                 with open(output_file, "a") as f:
                     values = [
@@ -71,6 +82,9 @@ def run_benchmark(runnable_name, runnable_params, mazes, output_file, runs):
                         runnable_params.get(CUMULATIVE, False),
                         runnable_params.get("bias", -0.2),
                         runnable_params.get("use_first_maze", False),
+                        runnable_params.get("observer").serialize()
+                        if runnable_params.get("observer")
+                        else None,
                         maze,
                         win,
                         event.data["number_of_steps"],
@@ -80,14 +94,18 @@ def run_benchmark(runnable_name, runnable_params, mazes, output_file, runs):
                         event.data["cumulative"],
                     ]
 
+                    # Acquire the lock to prevent concurrent access to the output file
                     f.write(",".join(map(str, values)) + "\n")
+                    # Release the lock
+
+                lock.release()
 
     safe_stop_jvm()
 
 
 def benchmark_runnables(
     mazes: Dict[str, str],
-    runnables: Dict[str, Dict],
+    runnables: List[Dict],
     runs=5,
 ):
     # Create the output directory if it does not exist.
@@ -134,12 +152,11 @@ def benchmark_runnables(
 
     processes = []
 
-    for name, runnable_params in runnables.items():
+    for runnable_params in runnables:
         # Create a new process for each runnable
         p = multiprocessing.Process(
             target=run_benchmark,
             args=(
-                name,
                 runnable_params,
                 mazes,
                 output_file,
@@ -172,14 +189,42 @@ if __name__ == "__main__":
         "maze_14": maze_14,
         "maze_15": maze_15,
     }
+    # Pour avoir dans l'article
+    # Tous les WK
+    # PDTWekaModel, C45WekaModel, NaiveBayesWekaModel, ManualModel
+    # Tout ça cumulatif, convergence_count=1_000
+    # BIAS = -0.2 et 0
+
+    configs = [
+        {
+            RUNNABLE_FACTORY: RunnableQLearner,
+            CONVERGENCE_COUNT: 1_000,
+        }
+    ]
+
+    for bias in [-0.2, 0]:
+        for cumulative in [True, False]:
+            for convergence_count in [1_000]:
+                for model in [
+                    ManualModel,
+                    PDTWekaModel,
+                    C45WekaModel,
+                    NaiveBayesWekaModel,
+                ]:
+                    for use_first_maze in [False]:
+                        configs.append(
+                            {
+                                RUNNABLE_FACTORY: RunnableProgressiveQLearner,
+                                MODEL_FACTORY: model,
+                                CUMULATIVE: cumulative,
+                                CONVERGENCE_COUNT: convergence_count,
+                                BIAS: bias,
+                                USE_FIRST_MAZE: use_first_maze,
+                            }
+                        )
 
     benchmark_runnables(
         _mazes,
-        {
-            "QLearner": {
-                RUNNABLE_FACTORY: RunnableQLearner,
-                CONVERGENCE_COUNT: 4_000,
-            },
-        },
-        runs=5,
+        configs,
+        runs=10,
     )

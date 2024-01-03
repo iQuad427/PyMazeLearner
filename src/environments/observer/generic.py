@@ -18,7 +18,6 @@ class GenericObserver(BaseObserver):
 
         general_observations = [obs.get_observation(env) for obs in self._observations if
                                 isinstance(obs, GeneralObservation)]
-
         for agent in env.agents:
             agent_observations = [obs.get_observation(env, agent) for obs in self._observations if
                                   isinstance(obs, AgentBasedObservation)]
@@ -27,6 +26,9 @@ class GenericObserver(BaseObserver):
                 general_observations + agent_observations
             )
         return observations
+
+    def serialize(self):
+        return "".join(self._observations.__class__.__name__)
 
 
 generic_default = GenericObserver(

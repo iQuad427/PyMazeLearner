@@ -2,10 +2,12 @@ import abc
 import math
 from collections import defaultdict
 
+from src.environments import observer
 from src.learners.progressive_qlearner import ProgressiveQLearner
 from src.learners.qlearner import QLearner
 from src.learners.symbolic_learner.learner import SymbolicLearner
 from src.runner.runner import Runner
+
 
 
 class BaseRunnable(metaclass=abc.ABCMeta):
@@ -59,6 +61,7 @@ class RunnableProgressiveQLearner(BaseRunnable):
         cumulative=False,
         bias=-0.2,
         use_first_maze=False,
+        observer=None,
         **kwargs,
     ):
         symbolic_learners = defaultdict(lambda: SymbolicLearner(model_factory))
@@ -79,6 +82,7 @@ class RunnableProgressiveQLearner(BaseRunnable):
                         bias=bias,
                     ),
                     event_callback=log,
+                    observer=observer if observer is not None else None,
                     convergence_count=kwargs.get("convergence_count", 200),
                 )
 
@@ -88,14 +92,14 @@ class RunnableProgressiveQLearner(BaseRunnable):
                     symbolic_learners.clear()
 
                 for event in self.events:
-                    yield maze, event
+                    yield name, event
                 self.events.clear()
 
                 if not use_first_maze or index == 0:
                     runner.configure(
                         train=False,
-                        convergence_count=math.inf,
-                        iterations=1_000,
+                        convergence_count=1_000,
+                        iterations=10_000,
                         enable_observation=True,
                         action_logger=lambda agent, state, action: symbolic_learners[
                             agent
