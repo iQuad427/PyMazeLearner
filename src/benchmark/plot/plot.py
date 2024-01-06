@@ -11,7 +11,7 @@ def read_csv(file):
 
 
 if __name__ == '__main__':
-    data = read_csv("asset/random_forest_bias.csv")
+    data = read_csv("asset/benchmark_2_1_2024_bias0.csv")
 
     # Pre-process data
 
@@ -43,7 +43,7 @@ if __name__ == '__main__':
     # Plot data (always compare to QLearner, plotting concat)
 
     # 0. Example plot (bar plot with width = 0.5)
-    def plot_comparison(df_1, df_2, column, title):
+    def plot_comparison(df_1, df_2, column, title, save=None):
         df = pd.concat([df_1, df_2, q_learner])
 
         # Plot
@@ -56,6 +56,8 @@ if __name__ == '__main__':
             xlabel="maze",
             ylabel=column,
         )
+        if save is not None:
+            plt.savefig(save, dpi=300)
         plt.show()
 
     # 1. Compare episodes between QLearner and ProgressiveQLearner with Weka non-cumulative
@@ -64,7 +66,8 @@ if __name__ == '__main__':
         # Weka but without cumulative
         weka[~weka["model"].str.contains("Cumulative")],
         "episodes",
-        title="Episode comparison between QLearner and ProgressiveQLearner with Weka non-cumulative"
+        title="Episode comparison between QLearner and ProgressiveQLearner with Weka non-cumulative",
+        save="png/episode_comparison_ql_vs_pql_weka_non_cumulative.png",
     )
 
     # 2. Compare episodes between QLearner and ProgressiveQLearner with Weka cumulative
@@ -73,51 +76,52 @@ if __name__ == '__main__':
         # Weka but with cumulative
         weka[weka["model"].str.contains("Cumulative")],
         "episodes",
-        title="Episode comparison between QLearner and ProgressiveQLearner with Weka cumulative"
+        title="Episode comparison between QLearner and ProgressiveQLearner with Weka cumulative",
+        save="png/episode_comparison_ql_vs_pql_weka_cumulative.png",
     )
 
     # 3. Compare episodes between QLearner and ProgressiveQLearner with new models non-cumulative
-    plot_comparison(
-        q_learner,
-        # New models but without cumulative
-        not_weka[~not_weka["model"].str.contains("Cumulative")],
-        "episodes",
-        title="Episode comparison between QLearner and ProgressiveQLearner with new models non-cumulative"
-    )
+    # plot_comparison(
+    #     q_learner,
+    #     # New models but without cumulative
+    #     not_weka[~not_weka["model"].str.contains("Cumulative")],
+    #     "episodes",
+    #     title="Episode comparison between QLearner and ProgressiveQLearner with new models non-cumulative"
+    # )
 
     # 4. Compare episodes between QLearner and ProgressiveQLearner with new models cumulative
-    plot_comparison(
-        q_learner,
-        # New models but with cumulative
-        not_weka[not_weka["model"].str.contains("Cumulative")],
-        "episodes",
-        title="Episode comparison between QLearner and ProgressiveQLearner with new models cumulative"
-    )
+    # plot_comparison(
+    #     q_learner,
+    #     # New models but with cumulative
+    #     not_weka[not_weka["model"].str.contains("Cumulative")],
+    #     "episodes",
+    #     title="Episode comparison between QLearner and ProgressiveQLearner with new models cumulative"
+    # )
 
     # 5. Compare ProgressiveQLearner with Weka and non-Weka non-cumulative
-    plot_comparison(
-        # Weka
-        weka[~weka["model"].str.contains("Cumulative")],
-        # New models
-        not_weka[~not_weka["model"].str.contains("Cumulative")],
-        "episodes",
-        title="Episode comparison between ProgressiveQLearner with Weka and non-Weka"
-    )
+    # plot_comparison(
+    #     # Weka
+    #     weka[~weka["model"].str.contains("Cumulative")],
+    #     # New models
+    #     not_weka[~not_weka["model"].str.contains("Cumulative")],
+    #     "episodes",
+    #     title="Episode comparison between ProgressiveQLearner with Weka and non-Weka"
+    # )
 
     # 6. Compare ProgressiveQLearner with Weka and non-Weka cumulative
-    plot_comparison(
-        # Weka
-        weka[weka["model"].str.contains("Cumulative")],
-        # New models
-        not_weka[not_weka["model"].str.contains("Cumulative")],
-        "episodes",
-        title="Episode comparison between ProgressiveQLearner with Weka and non-Weka cumulative"
-    )
+    # plot_comparison(
+    #     # Weka
+    #     weka[weka["model"].str.contains("Cumulative")],
+    #     # New models
+    #     not_weka[not_weka["model"].str.contains("Cumulative")],
+    #     "episodes",
+    #     title="Episode comparison between ProgressiveQLearner with Weka and non-Weka cumulative"
+    # )
 
-    plot_comparison(
-        random_forest,
-        q_learner,
-        "episodes",
-        title="Episode comparison between QLearner and RandomForestModel"
-    )
+    # plot_comparison(
+    #     random_forest,
+    #     q_learner,
+    #     "episodes",
+    #     title="Episode comparison between QLearner and RandomForestModel"
+    # )
 
