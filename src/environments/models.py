@@ -30,11 +30,14 @@ class BaseView(abc.ABC):
     def __hash__(self):
         pass
 
+    def get_oriented_views(self):
+        return [self]
+
 
 @dataclass
 class DefaultView(BaseView):
-    walls_agent: tuple
-    walls_minotaur: tuple
+    walls_agent: tuple  # (up, right, down, left) (1 if there is a wall, 0 otherwise)
+    walls_minotaur: tuple  # (up, right, down, left) (1 if there is a wall, 0 otherwise)
     distance_minotaur: int
     distance_exit: int
     direction_minotaur: tuple
@@ -89,6 +92,37 @@ class DefaultView(BaseView):
             and self.direction_exit == other.direction_exit
         )
 
+    def get_oriented_views(self):
+        oriented_views = []
+
+        for _ in range(4):
+            # Rotate the walls and directions
+            self.walls_agent = self.walls_agent[1:] + self.walls_agent[:1]
+            self.walls_minotaur = self.walls_minotaur[1:] + self.walls_minotaur[:1]
+            self.direction_minotaur = self.rotate_direction(self.direction_minotaur)
+            self.direction_exit = self.rotate_direction(self.direction_exit)
+
+            # Add the rotated view to the list
+            oriented_views.append(self.copy())
+
+        return oriented_views
+
+    def rotate_direction(self, direction):
+        # Assuming directions are represented as (x, y)
+        x, y = direction
+        return -y, x
+
+    def copy(self):
+        # Create a copy of the current instance
+        return DefaultView(
+            self.walls_agent,
+            self.walls_minotaur,
+            self.distance_minotaur,
+            self.distance_exit,
+            self.direction_minotaur,
+            self.direction_exit,
+        )
+
 
 class GenericView(BaseView):
     def names(self) -> tuple:
@@ -101,26 +135,23 @@ class GenericView(BaseView):
         self.observations = observations
 
     def __hash__(self):
-        return hash(
-            tuple(
-                [tuple(obs) for obs in self.observations]
-            )
-        )
+        return hash(tuple([tuple(obs) for obs in self.observations]))
 
     def flatten(self) -> tuple:
-        return tuple(
-            [x for obs in self.observations for x in obs]
-        )
+        return tuple([x for obs in self.observations for x in obs])
 
     def __eq__(self, other):
         instance_test = isinstance(other, GenericView)
-        value_t = [all(np.array(self.observations[i]) == np.array(other.observations[i])) for i, obs in
-                   enumerate(self.observations)]
+        value_t = [
+            all(np.array(self.observations[i]) == np.array(other.observations[i]))
+            for i, obs in enumerate(self.observations)
+        ]
         value_test = all(value_t)
         return value_test and instance_test
 
     def names(self) -> tuple:
         return None
+
 
 class Actions:
     STAY = 0
